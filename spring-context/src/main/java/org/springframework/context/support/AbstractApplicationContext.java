@@ -863,7 +863,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			getBean(weaverAwareName);
 		}
 
-		// Stop using the temporary ClassLoader for type matching.
+		//Stop using the temporary ClassLoader for type matching.
 		//停止用于类型匹配的临时类加载器
 		beanFactory.setTempClassLoader(null);
 

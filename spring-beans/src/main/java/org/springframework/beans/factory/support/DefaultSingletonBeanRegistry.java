@@ -179,14 +179,19 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		 * IOC容器初始化加载单实例bean的时候第一次进来时，该map一般返回空
 		 */
 		Object singletonObject = this.singletonObjects.get(beanName);
-		//如果在一级缓存中没有获取到对象，并且在singletonsCurrentlyInCreation这个list中包含该beanName
+		//如果在一级缓存中没有获取到对象，并且在 singletonsCurrentlyInCreation 这个list中包含该beanName
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			synchronized (this.singletonObjects) {
+				//从二级缓存(早期单例对象)中获取bean对象
 				singletonObject = this.earlySingletonObjects.get(beanName);
+				//二级缓存中没有，并且允许循环依赖
 				if (singletonObject == null && allowEarlyReference) {
+					//从三级缓存(单例工厂  singletonFactories)中获取？为什么要使用三级缓存单例工厂
 					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
+					//bean定义存在于三级缓存(单例工厂中)
 					if (singletonFactory != null) {
 						singletonObject = singletonFactory.getObject();
+						//把bean定义添加到二级缓存中，并从三级缓存中移除？为什么？
 						this.earlySingletonObjects.put(beanName, singletonObject);
 						this.singletonFactories.remove(beanName);
 					}
