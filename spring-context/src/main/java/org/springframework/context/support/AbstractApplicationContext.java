@@ -582,10 +582,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Initialize any placeholder property sources in the context environment.
+		//初始化上下文环境的属性资源中的占位符
 		initPropertySources();
 
 		// Validate that all properties marked as required are resolvable:
 		// see ConfigurablePropertyResolver#setRequiredProperties
+		//确认被标记为requeired属性被解析
 		getEnvironment().validateRequiredProperties();
 
 		// Store pre-refresh ApplicationListeners...
@@ -872,7 +874,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.freezeConfiguration();
 
 		// Instantiate all remaining (non-lazy-init) singletons.
-		//实例化所有（非懒加载的）单例对象
+		//实例化所有（非懒加载的）单例对象,单例对象才允许提前加载
 		beanFactory.preInstantiateSingletons();
 	}
 

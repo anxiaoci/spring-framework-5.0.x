@@ -352,7 +352,7 @@ public abstract class AbstractCacheAnnotationTests {
 	public void testCheckedThrowableSync(CacheableService<?> service) throws Exception {
 		String arg = UUID.randomUUID().toString();
 		try {
-			service.throwCheckedSync(arg);
+									service.throwCheckedSync(arg);
 			fail("Excepted exception");
 		}
 		catch (Exception ex) {

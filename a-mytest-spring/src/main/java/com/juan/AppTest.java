@@ -17,7 +17,7 @@ public class AppTest {
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext applicationContext
 				= new AnnotationConfigApplicationContext(AppConfig.class);
-		TestService bean = applicationContext.getBean( TestService.class );
-		System.out.println( bean );
+		TestService bean = applicationContext.getBean(TestService.class);
+		System.out.println(bean);
 	}
 }

@@ -60,20 +60,19 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements SingletonBeanRegistry {
 
 	/** Cache of singleton objects: bean name --> bean instance */
-	//单例缓存池(一级缓存):是一个ConcurrentHashMap(线程安全的Map):（bean名称：bean实例）
-	//初始化大小256
+	//单例对象缓存池(一级缓存):是一个ConcurrentHashMap(线程安全的Map):（bean名称：bean实例），缓存单例实例化对象的Map集合
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
 	/** Cache of singleton factories: bean name --> ObjectFactory */
-	//单例工厂池(单例工厂缓存):是一个HashMap:（bean名称：bean实例），初始化大小16
+	//单例的工厂Bean缓存集合:是一个HashMap:（bean名称：bean实例），初始化大小16
 	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
 	/** Cache of early singleton objects: bean name --> bean instance */
-	//提前创建单例池
+	//早期的单身对象缓存集合
 	private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
 
 	/** Set of registered singletons, containing the bean names in registration order */
-	//已注册单例池，以注册顺序保存注册实例名
+	//单例的实例化对象名称集合
 	private final Set<String> registeredSingletons = new LinkedHashSet<>(256);
 
 	/** Names of beans that are currently in creation */
@@ -139,6 +138,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
+	 * 添加单例实例
+	 * 解决循环引用的问题
 	 * Add the given singleton factory for building the specified singleton
 	 * if necessary.
 	 * <p>To be called for eager registration of singletons, e.g. to be able to
