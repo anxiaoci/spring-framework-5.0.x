@@ -1,7 +1,4 @@
-package com.juan.config;/**
- * @author admin
- * @date 2020/4/1
- */
+package com.juan.config;
 
 import com.juan.entity.Color;
 import org.springframework.context.annotation.Bean;

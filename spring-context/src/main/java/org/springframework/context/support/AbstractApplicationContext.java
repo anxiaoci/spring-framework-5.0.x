@@ -508,8 +508,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				postProcessBeanFactory(beanFactory);
 
 				// Invoke factory processors registered as beans in the context.
-				//5、调用bean工厂的后置处理器
-				//主要加载@Bean、@Component等bean定义，生成bean定义的集合
+				/*
+				 * 5.1 执行Bean工厂后置处理器，扫描basePackage，主要加载@Bean、@Component等bean定义，
+				 * 5.2 解析类成BeanDefinition对象，并且put进入beanDefinitionMap中（生成BeanDefinition的集合）
+				 * 5.3 再次执行bean工厂后置处理器完成cglib代理
+				 */
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
@@ -874,7 +877,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.freezeConfiguration();
 
 		// Instantiate all remaining (non-lazy-init) singletons.
-		//实例化所有（非懒加载的）单例对象,单例对象才允许提前加载
+		//实例化所有（非懒加载的）单例对象,单例对象才允许提前加载----重要
 		beanFactory.preInstantiateSingletons();
 	}
 

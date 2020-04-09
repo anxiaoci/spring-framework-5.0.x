@@ -186,6 +186,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @see #register(Class...)
 	 * @see #refresh()
 	 */
+	@Override
 	public void scan(String... basePackages) {
 		Assert.notEmpty( basePackages, "At least one base package must be specified" );
 		this.scanner.scan( basePackages );

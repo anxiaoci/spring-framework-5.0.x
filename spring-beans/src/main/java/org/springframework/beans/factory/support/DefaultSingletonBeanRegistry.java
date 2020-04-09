@@ -60,7 +60,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements SingletonBeanRegistry {
 
 	/** Cache of singleton objects: bean name --> bean instance */
-	//单例对象缓存池(一级缓存):是一个ConcurrentHashMap(线程安全的Map):（bean名称：bean实例），缓存单例实例化对象的Map集合
+	//单例对象缓存池(一级缓存):是一个ConcurrentHashMap(线程安全的Map):（bean名称：bean实例）
+	//集合缓存spring容器中实例化完成后的SpringBean的实例
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
 	/** Cache of singleton factories: bean name --> ObjectFactory */
@@ -68,7 +69,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
 	/** Cache of early singleton objects: bean name --> bean instance */
-	//早期的单身对象缓存集合
+	//早期单例对象缓存集合
+	// (提前曝光对象->单例对象(SpringBean)解决循环依赖时会把Bean对象创建(new)出来后（可能还没来得及填充属性和初始化）提前曝光)
+	// 对象（Object）是Java的类实例化的对象，SpringBean是经过Object实例化、属性填充、初始化等Spring对象生命周期完成后交给Spring容器管理的对象
 	private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
 
 	/** Set of registered singletons, containing the bean names in registration order */
@@ -186,13 +189,14 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				//从二级缓存(早期单例对象)中获取bean对象
 				singletonObject = this.earlySingletonObjects.get(beanName);
 				//二级缓存中没有，并且允许循环依赖
+				//allowEarlyReference 是否允许从singletonFactories中通过getObject拿到对象
 				if (singletonObject == null && allowEarlyReference) {
 					//从三级缓存(单例工厂  singletonFactories)中获取？为什么要使用三级缓存单例工厂
 					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 					//bean定义存在于三级缓存(单例工厂中)
 					if (singletonFactory != null) {
 						singletonObject = singletonFactory.getObject();
-						//把bean定义添加到二级缓存中，并从三级缓存中移除？为什么？
+						//把bean定义添加到二级缓存中，并从三级缓存中移除（为了解决循环依赖问题，把正在创建的Object实例存入早期单例对象集合中）
 						this.earlySingletonObjects.put(beanName, singletonObject);
 						this.singletonFactories.remove(beanName);
 					}

@@ -1,9 +1,5 @@
-package com.juan.service;/**
- * @author admin
- * @date 2020/4/1
- */
+package com.juan.service;
 
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,24 +9,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class TestService {
-	private UserService userService;
-
-	@Required
-	public void setUserService(UserService userService) {
-		this.userService = userService;
-	}
-
-	public TestService() {
-		System.out.println( "TestService id Created" );
-	}
-
-	public static TestService getStaticInstance() {
-		return new TestService();
-	}
-
-	TestService getNoneStatic() {
-		return new TestService();
-	}
 
 
 }
