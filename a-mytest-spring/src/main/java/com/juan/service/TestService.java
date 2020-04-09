@@ -3,6 +3,7 @@ package com.juan.service;/**
  * @date 2020/4/1
  */
 
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Component;
 
 /**
@@ -12,9 +13,24 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class TestService {
+	private UserService userService;
 
-	public TestService(){
-		System.out.println("TestService id Created");
+	@Required
+	public void setUserService(UserService userService) {
+		this.userService = userService;
 	}
+
+	public TestService() {
+		System.out.println( "TestService id Created" );
+	}
+
+	public static TestService getStaticInstance() {
+		return new TestService();
+	}
+
+	TestService getNoneStatic() {
+		return new TestService();
+	}
+
 
 }
