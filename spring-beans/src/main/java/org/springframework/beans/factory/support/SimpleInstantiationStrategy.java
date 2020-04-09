@@ -62,13 +62,16 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 		// Don't override the class with CGLIB if no overrides.
 		if (!bd.hasMethodOverrides()) {
 			Constructor<?> constructorToUse;
+			//同步方法的作用：1、获取bean实例化的构造器 2、把构造器传递给resolvedConstructorOrFactoryMethod
 			synchronized (bd.constructorArgumentLock) {
 				constructorToUse = (Constructor<?>) bd.resolvedConstructorOrFactoryMethod;
+				//没有可用构造器，使用默认无参构造器
 				if (constructorToUse == null) {
 					final Class<?> clazz = bd.getBeanClass();
 					if (clazz.isInterface()) {
 						throw new BeanInstantiationException(clazz, "Specified class is an interface");
 					}
+
 					try {
 						if (System.getSecurityManager() != null) {
 							constructorToUse = AccessController.doPrivileged(
@@ -84,10 +87,13 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					}
 				}
 			}
+
+			//使用解析获取到的构造器实例化对象，使用构造器的newInstance方法实例化对象
 			return BeanUtils.instantiateClass(constructorToUse);
 		}
 		else {
 			// Must generate CGLIB subclass.
+			//没有重写方法，使用CGLib动态代理方法实例化对象
 			return instantiateWithMethodInjection(bd, beanName, owner);
 		}
 	}

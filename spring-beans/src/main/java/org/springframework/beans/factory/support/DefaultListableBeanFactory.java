@@ -693,7 +693,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		// Trigger initialization of all non-lazy singleton beans...
 		//循环所有bean定义名称
 		for (String beanName : beanNames) {
-			//合并本地bean定义，获取beanName指定的Bean定义
+			//合并BeanDefinition(与父BeanDefinition合并)
+			// 如果本地mergedBeanDefinitions中已存在(说明目前合并已完成)，就返回；如果本地mergedBeanDefinitions中不存在，就去做一次合并
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
 			//根据bean定义 判断 非抽象，非单例，非懒加载
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
@@ -725,7 +726,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 		}
-
+		//执行初始化后回调函数
 		// Trigger post-initialization callback for all applicable beans...
 		for (String beanName : beanNames) {
 			//获取单例bean

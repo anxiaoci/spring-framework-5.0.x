@@ -190,6 +190,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private boolean enforceDestroyMethod = true;
 
+	//是否是合成的？
 	private boolean synthetic = false;
 
 	private int role = BeanDefinition.ROLE_APPLICATION;
@@ -254,6 +255,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			setAutowireCandidate(originalAbd.isAutowireCandidate());
 			setPrimary(originalAbd.isPrimary());
 			copyQualifiersFrom(originalAbd);
+			//把把BeanDefinition放入到Supplier中？
 			setInstanceSupplier(originalAbd.getInstanceSupplier());
 			setNonPublicAccessAllowed(originalAbd.isNonPublicAccessAllowed());
 			setLenientConstructorResolution(originalAbd.isLenientConstructorResolution());
