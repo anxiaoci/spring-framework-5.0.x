@@ -336,8 +336,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// Create bean instance.，判断是否是单例对象
 				if (mbd.isSingleton()) {
+					//在这次getSingleton方法中，创建bean时 加入到正在创建map中
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
+							//创建bean
 							return createBean(beanName, mbd, args);
 						} catch (BeansException ex) {
 							// Explicitly remove instance from singleton cache: It might have been put there

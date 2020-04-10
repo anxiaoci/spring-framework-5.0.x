@@ -16,13 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedExceptionAction;
-
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
@@ -30,6 +23,13 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 
 /**
  * Simple object instantiation strategy for use in a BeanFactory.
@@ -64,6 +64,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 			Constructor<?> constructorToUse;
 			//同步方法的作用：1、获取bean实例化的构造器 2、把构造器传递给resolvedConstructorOrFactoryMethod
 			synchronized (bd.constructorArgumentLock) {
+				//解析构造器或者工厂方法
 				constructorToUse = (Constructor<?>) bd.resolvedConstructorOrFactoryMethod;
 				//没有可用构造器，使用默认无参构造器
 				if (constructorToUse == null) {
@@ -78,6 +79,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 									(PrivilegedExceptionAction<Constructor<?>>) clazz::getDeclaredConstructor);
 						}
 						else {
+							//获取构造器
 							constructorToUse = clazz.getDeclaredConstructor();
 						}
 						bd.resolvedConstructorOrFactoryMethod = constructorToUse;

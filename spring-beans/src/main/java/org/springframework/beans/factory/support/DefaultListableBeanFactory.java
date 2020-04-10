@@ -749,6 +749,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	//---------------------------------------------------------------------
 	// Implementation of BeanDefinitionRegistry interface
+	// 把BeanDefinition   put入   beanDefinitionMap
 	//---------------------------------------------------------------------
 
 	@Override
@@ -814,8 +815,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						this.manualSingletonNames = updatedSingletons;
 					}
 				}
-			}
-			else {
+			}else {
 				// Still in startup registration phase
 				this.beanDefinitionMap.put(beanName, beanDefinition);
 				this.beanDefinitionNames.add(beanName);

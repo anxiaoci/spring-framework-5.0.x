@@ -4,8 +4,8 @@ package com.juan;/**
  */
 
 import com.juan.config.AppConfig;
-import com.juan.service.TestService;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author admin
@@ -15,9 +15,12 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 public class AppTest {
 	public static void main(String[] args) {
+		//初始化Spring容器
 		AnnotationConfigApplicationContext applicationContext
-				= new AnnotationConfigApplicationContext(AppConfig.class);
-		TestService bean = applicationContext.getBean(TestService.class);
-		System.out.println(bean);
+				= new AnnotationConfigApplicationContext( AppConfig.class );
+		ClassPathXmlApplicationContext xmlApplicationContext
+				= new ClassPathXmlApplicationContext( "spring-config.xml" );
+//		TestService bean = applicationContext.getBean(TestService.class);
+//		System.out.println(bean);
 	}
 }

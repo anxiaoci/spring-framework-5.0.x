@@ -96,9 +96,11 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 *                         e.g. {@link Configuration @Configuration} classes
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
-		//调用构造函数，传入DefaultListableBeanFactory和两种扫描器
+		//调用构造函数，实例化Spring 工厂
+		// SpringBean工厂：DefaultListableBeanFactory和两种扫描器(注解扫描器和配置文件扫描器)
 		this();
-		//注册配置类
+		//注册配置类(带有@Configuration注解的配置类)
+		//处理注解内容，生成注解的BeanDefinition存放到beanDefinitionMap中
 		register( annotatedClasses );
 		//刷新上下文环境
 		refresh();

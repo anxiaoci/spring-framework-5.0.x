@@ -223,6 +223,7 @@ public class AnnotatedBeanDefinitionReader {
 	<T> void doRegisterBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier, @Nullable String name,
 							@Nullable Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
 
+		//注解通用BeanDefinition
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition( annotatedClass );
 		if (this.conditionEvaluator.shouldSkip( abd.getMetadata() )) {
 			return;
@@ -234,9 +235,10 @@ public class AnnotatedBeanDefinitionReader {
 		abd.setScope( scopeMetadata.getScopeName() );
 		//获取beanname
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName( abd, this.registry ));
-
+		//处理通用注解
 		AnnotationConfigUtils.processCommonDefinitionAnnotations( abd );
 		if (qualifiers != null) {
+			//处理@Qualifier注解
 			for (Class<? extends Annotation> qualifier : qualifiers) {
 				if (Primary.class == qualifier) {
 					abd.setPrimary( true );

@@ -61,7 +61,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	/** Cache of singleton objects: bean name --> bean instance */
 	//单例对象缓存池(一级缓存):是一个ConcurrentHashMap(线程安全的Map):（bean名称：bean实例）
-	//集合缓存spring容器中实例化完成后的SpringBean的实例
+	//集合缓存spring容器中实例化完成（走完Spring生命周期）后的SpringBean的实例
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
 	/** Cache of singleton factories: bean name --> ObjectFactory */
@@ -227,7 +227,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				if (logger.isDebugEnabled()) {
 					logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
 				}
+				//判断正在创建，并添加到singletonsCurrentlyInCreation 这个Set集合中
 				beforeSingletonCreation(beanName);
+
 				boolean newSingleton = false;
 				boolean recordSuppressedExceptions = (this.suppressedExceptions == null);
 				if (recordSuppressedExceptions) {
@@ -348,6 +350,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * <p>The default implementation register the singleton as currently in creation.
 	 * @param beanName the name of the singleton about to be created
 	 * @see #isSingletonCurrentlyInCreation
+	 * 判断正在创建，并添加到singletonsCurrentlyInCreation 这个Set集合中
 	 */
 	protected void beforeSingletonCreation(String beanName) {
 		if (!this.inCreationCheckExclusions.contains(beanName) && !this.singletonsCurrentlyInCreation.add(beanName)) {
