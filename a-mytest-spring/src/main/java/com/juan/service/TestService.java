@@ -39,4 +39,10 @@ public class TestService {
 	public void setUserService(UserService userService) {
 		this.userService = userService;
 	}
+
+	@Override
+	public String toString(){
+		System.out.println("==========");
+		return super.toString();
+	}
 }
