@@ -170,8 +170,10 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		}
 	}
 
+
 	@Override
 	public final ConfigurableListableBeanFactory getBeanFactory() {
+		//???为什么要同步方法
 		synchronized (this.beanFactoryMonitor) {
 			if (this.beanFactory == null) {
 				throw new IllegalStateException("BeanFactory not initialized or already closed - " +

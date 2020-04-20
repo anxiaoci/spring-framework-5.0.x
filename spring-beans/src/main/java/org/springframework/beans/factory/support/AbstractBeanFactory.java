@@ -215,7 +215,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	public <T> T getBean(String name, @Nullable Class<T> requiredType, @Nullable Object... args)
 			throws BeansException {
-
+		//最终使用doGetBean方法获取到对象
 		return doGetBean(name, requiredType, args, false);
 	}
 
@@ -234,7 +234,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	@SuppressWarnings("unchecked")
 	protected <T> T doGetBean(final String name, @Nullable final Class<T> requiredType,
 							  @Nullable final Object[] args, boolean typeCheckOnly) throws BeansException {
-		//验证bean名称是否非法，这里传入的可能是bean的别名，也可能是bean的工厂bean的名称，所以需要转换
+		/**
+		 * 验证bean名称是否非法，这里传入的可能是bean的别名，也可能是bean的工厂bean的名称，所以需要转换
+		 * 通过传入的name获取beanName，这里不使用name直接作为beanNAme有两个原因：
+		 * 		1、name可以以&开头，表明调用者想获取FactoryBean本身，而不是FactoryBean中要创建的bean。
+		 * 		 在BeanFactory中，FactoryBean和其他的Bean的存储方式是一致的，即<beanName,bean>,
+		 * 		 beanName中移除&这个字符，所以需要将name的首字母&移除。这样才能从缓存中获取到FactoryBean实例
+		 * 		2、别名问题，转换需要
+		 */
+
+
 		final String beanName = transformedBeanName(name);
 		Object bean;
 
@@ -1641,11 +1650,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param beanName     the canonical bean name
 	 * @param mbd          the merged bean definition
 	 * @return the object to expose for the bean
+	 * 获取工厂bena方法
 	 */
 	protected Object getObjectForBeanInstance(
 			Object beanInstance, String name, String beanName, @Nullable RootBeanDefinition mbd) {
 
 		// Don't let calling code try to dereference the factory if the bean isn't a factory.
+		//判断是否为FactoryBean，判断传入name是否为 startwith '&'
+		//如果bean不是一个工厂，
 		if (BeanFactoryUtils.isFactoryDereference(name)) {
 			if (beanInstance instanceof NullBean) {
 				return beanInstance;

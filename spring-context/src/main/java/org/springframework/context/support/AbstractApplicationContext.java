@@ -694,6 +694,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.addPropertyEditorRegistrar( new ResourceEditorRegistrar( this, getEnvironment() ) );
 
 		// Configure the bean factory with context callbacks.
+		//使用context回调配置bean工厂
 		beanFactory.addBeanPostProcessor( new ApplicationContextAwareProcessor( this ) );
 		beanFactory.ignoreDependencyInterface( EnvironmentAware.class );
 		beanFactory.ignoreDependencyInterface( EmbeddedValueResolverAware.class );
@@ -716,6 +717,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		if (beanFactory.containsBean( LOAD_TIME_WEAVER_BEAN_NAME )) {
 			beanFactory.addBeanPostProcessor( new LoadTimeWeaverAwareProcessor( beanFactory ) );
 			// Set a temporary ClassLoader for type matching.
+			//用于类型匹配的临时类加载器
 			beanFactory.setTempClassLoader( new ContextTypeMatchClassLoader( beanFactory.getBeanClassLoader() ) );
 		}
 
@@ -753,6 +755,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found in the meantime
 		// (e.g. through an @Bean method registered by ConfigurationClassPostProcessor)
+		//
 		if (beanFactory.getTempClassLoader() == null && beanFactory.containsBean( LOAD_TIME_WEAVER_BEAN_NAME )) {
 			beanFactory.addBeanPostProcessor( new LoadTimeWeaverAwareProcessor( beanFactory ) );
 			beanFactory.setTempClassLoader( new ContextTypeMatchClassLoader( beanFactory.getBeanClassLoader() ) );
@@ -1178,7 +1181,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public <T> T getBean(Class<T> requiredType) throws BeansException {
+		//判断BeanFActory的激活状态
 		assertBeanFactoryActive();
+		//获取的是一个DefaultListableBeanFactory，
 		return getBeanFactory().getBean( requiredType );
 	}
 

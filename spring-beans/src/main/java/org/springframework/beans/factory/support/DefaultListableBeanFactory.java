@@ -291,12 +291,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public <T> T getBean(Class<T> requiredType) throws BeansException {
+		//该方法为空壳方法，所有方法都在doGetBean中
 		return getBean(requiredType, (Object[]) null);
 	}
 
 	@Override
 	public <T> T getBean(Class<T> requiredType, @Nullable Object... args) throws BeansException {
+		//解析bean
+		//NamedBeanHolder 内部存放的内容是bean的名称和实例
 		NamedBeanHolder<T> namedBean = resolveNamedBean(requiredType, args);
+		//如果获取到bean不为空，则直接返回bean实例-----单例方式和原型方式有什么区别
 		if (namedBean != null) {
 			return namedBean.getBeanInstance();
 		}
@@ -758,9 +762,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		Assert.hasText(beanName, "Bean name must not be empty");
 		Assert.notNull(beanDefinition, "BeanDefinition must not be null");
-
+		//验证bean定义是不是AbstractBeanDefinition
 		if (beanDefinition instanceof AbstractBeanDefinition) {
 			try {
+				//验证方法
 				((AbstractBeanDefinition) beanDefinition).validate();
 			}
 			catch (BeanDefinitionValidationException ex) {
@@ -768,8 +773,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						"Validation of bean definition failed", ex);
 			}
 		}
-
+		//
 		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
+		//bean已经在beanDefinitionMap，做进一步判断是否需要把bean再次放到beanDefinitionMap中
 		if (existingDefinition != null) {
 			if (!isAllowBeanDefinitionOverriding()) {
 				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
@@ -800,10 +806,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			this.beanDefinitionMap.put(beanName, beanDefinition);
 		}
-		else {
+		else { //如果当前注册的bean不在beanDefinitionMap
+			//bean创建已经开始
 			if (hasBeanCreationStarted()) {
 				// Cannot modify startup-time collection elements anymore (for stable iteration)
-				synchronized (this.beanDefinitionMap) {
+				synchronized (this.beanDefinitionMap) { //同步方式把bean定义放入beanDefinitionMap
 					this.beanDefinitionMap.put(beanName, beanDefinition);
 					List<String> updatedDefinitions = new ArrayList<>(this.beanDefinitionNames.size() + 1);
 					updatedDefinitions.addAll(this.beanDefinitionNames);
@@ -815,10 +822,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						this.manualSingletonNames = updatedSingletons;
 					}
 				}
-			}else {
+			}else { //bean没有开始创建
 				// Still in startup registration phase
+				//bean定义map
 				this.beanDefinitionMap.put(beanName, beanDefinition);
+				//bean定义名称的list集合
 				this.beanDefinitionNames.add(beanName);
+				//
 				this.manualSingletonNames.remove(beanName);
 			}
 			this.frozenBeanDefinitionNames = null;
@@ -962,7 +972,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private <T> NamedBeanHolder<T> resolveNamedBean(Class<T> requiredType, @Nullable Object... args) throws BeansException {
 		Assert.notNull(requiredType, "Required type must not be null");
 		String[] candidateNames = getBeanNamesForType(requiredType);
-
+		/**
+		 * 对象可能有别名，所以需要处理别名
+		 */
 		if (candidateNames.length > 1) {
 			List<String> autowireCandidates = new ArrayList<>(candidateNames.length);
 			for (String beanName : candidateNames) {
@@ -977,6 +989,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		if (candidateNames.length == 1) {
 			String beanName = candidateNames[0];
+			//getBean方法才是获取bean实例的方法
 			return new NamedBeanHolder<>(beanName, getBean(beanName, requiredType, args));
 		}
 		else if (candidateNames.length > 1) {
@@ -990,6 +1003,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					candidates.put(beanName, getType(beanName));
 				}
 			}
+			//推断主
 			String candidateName = determinePrimaryCandidate(candidates, requiredType);
 			if (candidateName == null) {
 				candidateName = determineHighestPriorityCandidate(candidates, requiredType);

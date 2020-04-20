@@ -223,21 +223,24 @@ public class AnnotatedBeanDefinitionReader {
 	<T> void doRegisterBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier, @Nullable String name,
 							@Nullable Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
 
-		//注解通用BeanDefinition
+		//为配置bean生成BeanDefinitation
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition( annotatedClass );
 		if (this.conditionEvaluator.shouldSkip( abd.getMetadata() )) {
 			return;
 		}
 
+
 		abd.setInstanceSupplier( instanceSupplier );
+		//获取bean的作用域
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata( abd );
 		//singleton模式或者prototype模式
+		//把bean的作用域添加到beandefinition中
 		abd.setScope( scopeMetadata.getScopeName() );
-		//获取beanname
+		//获取beanname，如果没有给bean定义一个名字，则为bean生成一个名字（name生成器）
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName( abd, this.registry ));
-		//处理通用注解
+		//处理类中通用注解 @Lazy @Primary @DependOn等
 		AnnotationConfigUtils.processCommonDefinitionAnnotations( abd );
-		if (qualifiers != null) {
+			if (qualifiers != null) {
 			//处理@Qualifier注解
 			for (Class<? extends Annotation> qualifier : qualifiers) {
 				if (Primary.class == qualifier) {
@@ -252,9 +255,14 @@ public class AnnotatedBeanDefinitionReader {
 		for (BeanDefinitionCustomizer customizer : definitionCustomizers) {
 			customizer.customize( abd );
 		}
-
+		//一个数据结构，属性内容包括beanname、beandefinition
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder( abd, beanName );
+		//处理Scope代理模型，需要结合springmvc理解？？？为什么要这么麻烦生成一个definitionHolder，后面还是只是获取了beandefinition注册？？？
 		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode( scopeMetadata, definitionHolder, this.registry );
+		//把definitionHolder注册给registry
+		//registry就是AnnotationConfigApplicationContext
+		//AnnotationConfigApplicationContexta在初始化的时候通过调用父类的构造方法实例化一个DefaultListableBeanFactory
+		//registerBeanDefinition里面就是把definitionHolder这个数据结构包含的信息注册到DefaultListableBeanFactory中
 		BeanDefinitionReaderUtils.registerBeanDefinition( definitionHolder, this.registry );
 	}
 

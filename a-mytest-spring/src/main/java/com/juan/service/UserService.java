@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * @date 2020/4/1
  * @decription:
  */
-@Component
+//@Component()
 public class UserService {
 	@Autowired
 	private TestService testService;
@@ -19,6 +19,10 @@ public class UserService {
 	public UserService(){
 		System.out.println("UserService is created");
 
+	}
+
+	public void init(){
+		System.out.println("userService init----------");
 	}
 
 }

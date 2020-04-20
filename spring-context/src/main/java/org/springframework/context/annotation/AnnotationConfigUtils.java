@@ -58,7 +58,7 @@ import org.springframework.util.ClassUtils;
  * @see CommonAnnotationBeanPostProcessor
  * @see org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor
  * @see org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor
- * @see org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor
+ * @ org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor
  */
 public class AnnotationConfigUtils {
 
@@ -237,32 +237,43 @@ public class AnnotationConfigUtils {
 		processCommonDefinitionAnnotations(abd, abd.getMetadata());
 	}
 
+	/**
+	 * 检查常用的注解
+	 * @param abd
+	 * @param metadata
+	 */
 	static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd, AnnotatedTypeMetadata metadata) {
+		//解析bean定义是否有@Lazy注解
 		AnnotationAttributes lazy = attributesFor(metadata, Lazy.class);
 		if (lazy != null) {
+			//如果有@Lazy，放入到bean定义中
 			abd.setLazyInit(lazy.getBoolean("value"));
-		}
-		else if (abd.getMetadata() != metadata) {
+		}else if (abd.getMetadata() != metadata) { //两遍确认。。。
 			lazy = attributesFor(abd.getMetadata(), Lazy.class);
 			if (lazy != null) {
 				abd.setLazyInit(lazy.getBoolean("value"));
 			}
 		}
-
+		//解析bean定义是否有@Primary注解
 		if (metadata.isAnnotated(Primary.class.getName())) {
 			abd.setPrimary(true);
 		}
+		//解析bean定义的 @DependOn
 		AnnotationAttributes dependsOn = attributesFor(metadata, DependsOn.class);
 		if (dependsOn != null) {
 			abd.setDependsOn(dependsOn.getStringArray("value"));
 		}
 
+		//如果是AbstractBeanDefinition
 		if (abd instanceof AbstractBeanDefinition) {
 			AbstractBeanDefinition absBd = (AbstractBeanDefinition) abd;
+			//解析@Role
 			AnnotationAttributes role = attributesFor(metadata, Role.class);
+			//如果是抽象BeanDefinition
 			if (role != null) {
 				absBd.setRole(role.getNumber("value").intValue());
 			}
+			//解析@Description
 			AnnotationAttributes description = attributesFor(metadata, Description.class);
 			if (description != null) {
 				absBd.setDescription(description.getString("value"));
