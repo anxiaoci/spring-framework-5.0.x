@@ -17,6 +17,7 @@
 package org.springframework.context.annotation;
 
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -68,7 +69,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * @see #setEnvironment(Environment)
 	 */
 	public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry) {
-		this( registry, getOrCreateEnvironment( registry ) );
+		this(registry, getOrCreateEnvironment(registry));
 	}
 
 	/**
@@ -82,11 +83,11 @@ public class AnnotatedBeanDefinitionReader {
 	 * @since 3.1
 	 */
 	public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry, Environment environment) {
-		Assert.notNull( registry, "BeanDefinitionRegistry must not be null" );
-		Assert.notNull( environment, "Environment must not be null" );
+		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
+		Assert.notNull(environment, "Environment must not be null");
 		this.registry = registry;
-		this.conditionEvaluator = new ConditionEvaluator( registry, environment, null );
-		AnnotationConfigUtils.registerAnnotationConfigProcessors( this.registry );
+		this.conditionEvaluator = new ConditionEvaluator(registry, environment, null);
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
 
 
@@ -105,7 +106,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * @see #registerBean(Class, String, Class...)
 	 */
 	public void setEnvironment(Environment environment) {
-		this.conditionEvaluator = new ConditionEvaluator( this.registry, environment, null );
+		this.conditionEvaluator = new ConditionEvaluator(this.registry, environment, null);
 	}
 
 	/**
@@ -136,7 +137,7 @@ public class AnnotatedBeanDefinitionReader {
 	 */
 	public void register(Class<?>... annotatedClasses) {
 		for (Class<?> annotatedClass : annotatedClasses) {
-			registerBean( annotatedClass );
+			registerBean(annotatedClass);
 		}
 	}
 
@@ -147,7 +148,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * @param annotatedClass the class of the bean
 	 */
 	public void registerBean(Class<?> annotatedClass) {
-		doRegisterBean( annotatedClass, null, null, null );
+		doRegisterBean(annotatedClass, null, null, null);
 	}
 
 	/**
@@ -161,7 +162,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * @since 5.0
 	 */
 	public <T> void registerBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier) {
-		doRegisterBean( annotatedClass, instanceSupplier, null, null );
+		doRegisterBean(annotatedClass, instanceSupplier, null, null);
 	}
 
 	/**
@@ -176,7 +177,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * @since 5.0
 	 */
 	public <T> void registerBean(Class<T> annotatedClass, String name, @Nullable Supplier<T> instanceSupplier) {
-		doRegisterBean( annotatedClass, instanceSupplier, name, null );
+		doRegisterBean(annotatedClass, instanceSupplier, name, null);
 	}
 
 	/**
@@ -189,7 +190,7 @@ public class AnnotatedBeanDefinitionReader {
 	 */
 	@SuppressWarnings("unchecked")
 	public void registerBean(Class<?> annotatedClass, Class<? extends Annotation>... qualifiers) {
-		doRegisterBean( annotatedClass, null, null, qualifiers );
+		doRegisterBean(annotatedClass, null, null, qualifiers);
 	}
 
 	/**
@@ -203,7 +204,7 @@ public class AnnotatedBeanDefinitionReader {
 	 */
 	@SuppressWarnings("unchecked")
 	public void registerBean(Class<?> annotatedClass, String name, Class<? extends Annotation>... qualifiers) {
-		doRegisterBean( annotatedClass, null, name, qualifiers );
+		doRegisterBean(annotatedClass, null, name, qualifiers);
 	}
 
 	/**
@@ -222,48 +223,48 @@ public class AnnotatedBeanDefinitionReader {
 	 */
 	<T> void doRegisterBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier, @Nullable String name,
 							@Nullable Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
-
 		//为配置bean生成BeanDefinitation
-		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition( annotatedClass );
-		if (this.conditionEvaluator.shouldSkip( abd.getMetadata() )) {
+		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
+		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
 			return;
 		}
 
 
-		abd.setInstanceSupplier( instanceSupplier );
+		abd.setInstanceSupplier(instanceSupplier);
 		//获取bean的作用域
-		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata( abd );
+		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
 		//singleton模式或者prototype模式
 		//把bean的作用域添加到beandefinition中
-		abd.setScope( scopeMetadata.getScopeName() );
+		abd.setScope(scopeMetadata.getScopeName());
 		//获取beanname，如果没有给bean定义一个名字，则为bean生成一个名字（name生成器）
-		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName( abd, this.registry ));
+		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
 		//处理类中通用注解 @Lazy @Primary @DependOn等
-		AnnotationConfigUtils.processCommonDefinitionAnnotations( abd );
-			if (qualifiers != null) {
-			//处理@Qualifier注解
+		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
+		//一般是传进来的
+		if (qualifiers != null) {
+			//对传入的注解内容进行解析  @Primary，@Lazy
 			for (Class<? extends Annotation> qualifier : qualifiers) {
 				if (Primary.class == qualifier) {
-					abd.setPrimary( true );
+					abd.setPrimary(true);
 				} else if (Lazy.class == qualifier) {
-					abd.setLazyInit( true );
+					abd.setLazyInit(true);
 				} else {
-					abd.addQualifier( new AutowireCandidateQualifier( qualifier ) );
+					abd.addQualifier(new AutowireCandidateQualifier(qualifier));
 				}
 			}
 		}
 		for (BeanDefinitionCustomizer customizer : definitionCustomizers) {
-			customizer.customize( abd );
+			customizer.customize(abd);
 		}
 		//一个数据结构，属性内容包括beanname、beandefinition
-		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder( abd, beanName );
+		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
 		//处理Scope代理模型，需要结合springmvc理解？？？为什么要这么麻烦生成一个definitionHolder，后面还是只是获取了beandefinition注册？？？
-		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode( scopeMetadata, definitionHolder, this.registry );
+		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 		//把definitionHolder注册给registry
 		//registry就是AnnotationConfigApplicationContext
 		//AnnotationConfigApplicationContexta在初始化的时候通过调用父类的构造方法实例化一个DefaultListableBeanFactory
 		//registerBeanDefinition里面就是把definitionHolder这个数据结构包含的信息注册到DefaultListableBeanFactory中
-		BeanDefinitionReaderUtils.registerBeanDefinition( definitionHolder, this.registry );
+		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
 	}
 
 
@@ -272,7 +273,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * StandardEnvironment.
 	 */
 	private static Environment getOrCreateEnvironment(BeanDefinitionRegistry registry) {
-		Assert.notNull( registry, "BeanDefinitionRegistry must not be null" );
+		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		if (registry instanceof EnvironmentCapable) {
 			return ((EnvironmentCapable) registry).getEnvironment();
 		}
