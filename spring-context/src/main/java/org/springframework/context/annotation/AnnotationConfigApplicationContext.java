@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
 
 import java.util.function.Supplier;
 
+
 /**
  * Standalone application context, accepting annotated classes as input - in particular
  * {@link Configuration @Configuration}-annotated classes, but also plain
@@ -49,6 +50,21 @@ import java.util.function.Supplier;
  * @see ClassPathBeanDefinitionScanner
  * @see org.springframework.context.support.GenericXmlApplicationContext
  * @since 3.0
+ *
+ * Spring中用来解析注解bean的定义有两个：
+ * AnnotationConfigApplicationContext和
+ * AnnotationConfigWebApplicationContext。
+ * AnnotationConfigWebApplicationContext是AnnotationConfigApplicationContext的web版本
+ * 两者的用法和对注解的处理方法几乎没有差别
+ * 通过分析这个类，可以知道注册一个bean到Spring容器中有两种方法：
+ * 一、直接将注解bean注册到容器中（参考public void register(Class<?>... annotatedClasses)）
+ * 注册一个注解bean到容器中也分两种方法：
+ * 1、在初始化容器时注册并解析
+ * 2、在容器创建以后手动调用注册 方法向容器中注册，然后手动调用刷新方法refresh刷新容器，使得容器对注册的注解bean进行处理
+ * ---->@Profile 注解是第二种方法
+ * ---->两种方法的优缺点和使用场景
+ * 二、通过扫描指定包及其子包下所有类的方式
+ * 扫描方式注册同上，分为初始化扫描和初始化以后扫描
  */
 public class AnnotationConfigApplicationContext extends GenericApplicationContext implements AnnotationConfigRegistry {
 
@@ -69,11 +85,11 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		 */
 		/**
 		 * 初始化注解模式下的bean定义扫描器
-		 * 调用AnnotatedBeanDefinitionReader的构造方法，传入的是this(AnnotationConfigApplicationContext)对象
+		 * 作用：BeanDefinition读取器
 		 */
 		this.reader = new AnnotatedBeanDefinitionReader( this );
 		/**
-		 * 初始化classpath类型的bean定义扫描器
+		 * 作用：BeanDefinition扫描器，扫描classpath下类生成BeanDefinition
 		 */
 		this.scanner = new ClassPathBeanDefinitionScanner( this );
 	}
@@ -95,15 +111,25 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 *
 	 * @param annotatedClasses one or more annotated classes,
 	 *                         e.g. {@link Configuration @Configuration} classes
+	 *                         这个构造方法需要传入一个 java config注解了的配置类，这个配置类被
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
-		//调用构造函数，实例化Spring 工厂
-		// SpringBean工厂：DefaultListableBeanFactory和两种扫描器(注解扫描器和配置文件扫描器)
+		/*
+		 * Spring的前提环境准备
+		 * 1、准备Spring的Bean工厂：实例化DefaultListableBeanFactory
+		 * 		--->org.springframework.context.support.GenericApplicationContext->GenericApplicationContext()
+		 * 2、初始化一个读取器 AnnotatedBeanDefinitionReader
+		 * 3、初始化一个扫描器 ClassPathBeanDefinitionScanner
+		 */
 		this();
 		//注册配置类(带有@Configuration注解的配置类)
 		//处理注解内容，注解生成BeanDefinition存放到beanDefinitionMap中
+		/**
+		 * 把一个配置类转为BeanDefinition，put 到beanDefinitionMap中
+		 * beanDefinitionMap是DefaultListableBeanFactory的一个属性
+		 */
 		register( annotatedClasses );
-		//刷新上下文环境
+		//初始化Spring环境
 		refresh();
 	}
 

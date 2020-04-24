@@ -115,7 +115,8 @@ public class EncodedUriTests {
 	@Component
 	private static class HandlerMappingConfigurer implements BeanPostProcessor, PriorityOrdered {
 
-		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+		@Override
+        public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			if (bean instanceof RequestMappingHandlerMapping) {
 				RequestMappingHandlerMapping requestMappingHandlerMapping = (RequestMappingHandlerMapping) bean;
 
@@ -125,6 +126,7 @@ public class EncodedUriTests {
 			return bean;
 		}
 
+		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
 		}

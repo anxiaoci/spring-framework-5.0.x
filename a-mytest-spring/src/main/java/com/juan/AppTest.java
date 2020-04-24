@@ -4,10 +4,6 @@ package com.juan;/**
  */
 
 import com.juan.config.AppConfig;
-import com.juan.service.MyFactoryBean;
-import com.juan.service.MyTestBean;
-import com.juan.service.TestService;
-import com.juan.service.UserService;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
@@ -22,7 +18,6 @@ public class AppTest {
 		AnnotationConfigApplicationContext applicationContext
 				= new AnnotationConfigApplicationContext(AppConfig.class);
 //		applicationContext.getBean(TestService.class).hashCode();
-		applicationContext.getBean("&myTestBean");
 
 
 	}

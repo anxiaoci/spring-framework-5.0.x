@@ -547,7 +547,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
-			//3、对bean工厂填充属性(Bean工厂初始化)
+			//3、对bean工厂填充属性(Bean工厂初始化)--重要
 			prepareBeanFactory( beanFactory );
 
 			try {
@@ -682,6 +682,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * 配置BeanFactory的标准特征，比如上下文的加载器和post-processor回调
 	 * Configure the factory's standard context characteristics,
 	 * such as the context's ClassLoader and post-processors.
 	 *
@@ -689,12 +690,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		// Tell the internal bean factory to use the context's class loader etc.
+		//bean的classloader
 		beanFactory.setBeanClassLoader( getClassLoader() );
+		//bean的表达式解析
 		beanFactory.setBeanExpressionResolver( new StandardBeanExpressionResolver( beanFactory.getBeanClassLoader() ) );
+		//属性编辑器，该编辑器可以获取到Properties、xml、yml等配置文件
 		beanFactory.addPropertyEditorRegistrar( new ResourceEditorRegistrar( this, getEnvironment() ) );
 
 		// Configure the bean factory with context callbacks.
-		//使用context回调配置bean工厂
+		//添加bean的后置处理器---spring中最核心的，Spring的扩展点之一，最重要的
+		//spring的BeanPostProcessor，是一个集合
+		//Spring容器添加Bean的方式有两个：
+		// 	1、Bean添加@Component等注解的方式，并通过添加扫描包，告知Spring容器来扫描指定包及其子包来获取到指定的Bean
+		// 	@Component注解来把Bean交给Spring容器管理，Spring自己写的Bean没有添加，
+		// 	2、有些包不能指定扫描，那Spring容器就通过手动添加的方式注入
 		beanFactory.addBeanPostProcessor( new ApplicationContextAwareProcessor( this ) );
 		beanFactory.ignoreDependencyInterface( EnvironmentAware.class );
 		beanFactory.ignoreDependencyInterface( EmbeddedValueResolverAware.class );
