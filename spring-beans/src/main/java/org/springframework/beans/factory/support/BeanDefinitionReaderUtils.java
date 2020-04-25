@@ -149,7 +149,7 @@ public class BeanDefinitionReaderUtils {
 		// Register bean definition under primary name.
 		//主名称（非别名）进行注册
 		String beanName = definitionHolder.getBeanName();
-		//注册bean定义的方法
+		//注册bean定义的方法，把BeanDefinition放入到Spring容器的map中
 		registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());
 
 		// Register aliases for bean name, if any.

@@ -160,12 +160,18 @@ class ConfigurationClassParser {
 	}
 
 
+	/**
+	 * 扫描包
+	 *
+	 * @param configCandidates
+	 */
 	public void parse(Set<BeanDefinitionHolder> configCandidates) {
 		this.deferredImportSelectors = new LinkedList<>();
 		//根据BeanDefinition的不同做不同的处理
 		for (BeanDefinitionHolder holder : configCandidates) {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
+				//如果是配置bean，也就是被@Configuration注解的bean
 				if (bd instanceof AnnotatedBeanDefinition) {
 					parse(((AnnotatedBeanDefinition) bd).getMetadata(), holder.getBeanName());
 				} else if (bd instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) bd).hasBeanClass()) {
@@ -221,8 +227,10 @@ class ConfigurationClassParser {
 
 		ConfigurationClass existingClass = this.configurationClasses.get(configClass);
 		if (existingClass != null) {
+			//处理@Import
 			if (configClass.isImported()) {
 				if (existingClass.isImported()) {
+					//@Import的class 合并
 					existingClass.mergeImportedBy(configClass);
 				}
 				// Otherwise ignore new imported config class; existing non-imported class overrides it.
@@ -235,11 +243,14 @@ class ConfigurationClassParser {
 			}
 		}
 
-		// Recursively process the configuration class and its superclass hierarchy.
-		// 把配置类转为SourceClass（一个实现Ordered接口的配置类），进行了类型封装
+		/**
+		 * Recursively process the configuration class and its superclass hierarchy.
+		 * 递归调用配置类
+		 * 		把配置类转为SourceClass（一个实现Ordered接口的配置类），进行了类型封装
+		 */
 		SourceClass sourceClass = asSourceClass(configClass);
 		do {
-			//处理内部类，一般不会写内部类
+			//处理配置信息，如@ComponentScan等
 			sourceClass = doProcessConfigurationClass(configClass, sourceClass);
 		}
 		while (sourceClass != null);
@@ -255,6 +266,8 @@ class ConfigurationClassParser {
 	 * @param configClass the configuration class being build
 	 * @param sourceClass a source class
 	 * @return the superclass, or {@code null} if none found or previously processed
+	 *
+	 * 解析配置类
 	 */
 	@Nullable
 	protected final SourceClass doProcessConfigurationClass(ConfigurationClass configClass, SourceClass sourceClass)
@@ -264,6 +277,7 @@ class ConfigurationClassParser {
 		processMemberClasses(configClass, sourceClass);
 
 		// Process any @PropertySource annotations
+		//处理 所有被@PropertySource注解的配置类
 		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), PropertySources.class,
 				org.springframework.context.annotation.PropertySource.class)) {
@@ -276,12 +290,15 @@ class ConfigurationClassParser {
 		}
 
 		// Process any @ComponentScan annotations
+		// 处理所有被 @ComponentScan 注解的配置类
 		Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
 		if (!componentScans.isEmpty() &&
 				!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
-			for (AnnotationAttributes componentScan : componentScans) {
+			//循环扫描所有的basePackage，为每个
+			for (AnnotationAttributes componentScan : componentScans) { //循环扫描
 				// The config class is annotated with @ComponentScan -> perform the scan immediately
+				//解析componentScan中包及其子包的类，放到scannedBeanDefinitions 这个set 集合中
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 				// Check the set of scanned definitions for any further config classes and parse recursively if needed
@@ -290,6 +307,7 @@ class ConfigurationClassParser {
 					if (bdCand == null) {
 						bdCand = holder.getBeanDefinition();
 					}
+					//检查被扫描的类中有Configutation，则来解析
 					if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
 						parse(bdCand.getBeanClassName(), holder.getBeanName());
 					}

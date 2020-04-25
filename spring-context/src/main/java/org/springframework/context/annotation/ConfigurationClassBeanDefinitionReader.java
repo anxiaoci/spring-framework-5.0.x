@@ -135,9 +135,11 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
+		//被@Import引入
 		if (configClass.isImported()) {
 			registerBeanDefinitionForImportedConfigurationClass(configClass);
 		}
+		//解析bean method
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}

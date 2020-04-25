@@ -331,10 +331,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		//alreadyParsed 判断是否处理过
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
-			//扫描包
+			//扫描包 -----此过程把我们使用@Component注解的类扫描到Spring容器中，使Spring容器持有其BeanDefinition
 			parser.parse(candidates);
+
 			parser.validate();
 
+			//获取到通过Configuration扫描到的bean
 			Set<ConfigurationClass> configClasses = new LinkedHashSet<>(parser.getConfigurationClasses());
 			configClasses.removeAll(alreadyParsed);
 
@@ -344,7 +346,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 						registry, this.sourceExtractor, this.resourceLoader, this.environment,
 						this.importBeanNameGenerator, parser.getImportRegistry());
 			}
+			//BeanDefinitionReader 加载BeanDefinition到Spring容器中，把对应的BeanDefinition添加到BeanFactory中的map中
 			this.reader.loadBeanDefinitions(configClasses);
+			//通过reader加载到Spring容器中就是处理过
 			alreadyParsed.addAll(configClasses);
 
 			candidates.clear();
