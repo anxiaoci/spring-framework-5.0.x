@@ -3,6 +3,8 @@ package com.juan.config;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,8 +13,7 @@ import org.springframework.stereotype.Component;
  * @decription:
  */
 
-@Component
-public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+public class MyBeanFactoryPostProcessor implements BeanDefinitionRegistryPostProcessor {
 	/**
 	 * Modify the application context's internal bean factory after its standard
 	 * initialization. All bean definitions will have been loaded, but no beans
@@ -25,7 +26,12 @@ public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		System.out.println( "-----------------------------" );
-		System.out.println(beanFactory.getClass().getName());
+		System.out.println("name--->"+beanFactory.getClass().getName());
 		System.out.println( "-----------------------------" );
+	}
+
+	@Override
+	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+		System.out.println("--------------MyBeanFactoryPostProcessor");
 	}
 }

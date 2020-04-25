@@ -4,6 +4,7 @@ package com.juan;/**
  */
 
 import com.juan.config.AppConfig;
+import com.juan.config.MyBeanFactoryPostProcessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
@@ -16,7 +17,10 @@ public class AppTest {
 	public static void main(String[] args) {
 		//初始化Spring容器
 		AnnotationConfigApplicationContext applicationContext
-				= new AnnotationConfigApplicationContext(AppConfig.class);
+				= new AnnotationConfigApplicationContext();
+		applicationContext.register(AppConfig.class);
+		applicationContext.addBeanFactoryPostProcessor(new MyBeanFactoryPostProcessor());
+		applicationContext.refresh();
 //		applicationContext.getBean(TestService.class).hashCode();
 
 

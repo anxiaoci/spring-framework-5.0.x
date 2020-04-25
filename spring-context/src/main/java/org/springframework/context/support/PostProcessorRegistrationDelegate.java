@@ -47,26 +47,42 @@ import org.springframework.lang.Nullable;
  * @since 4.0
  */
 final class PostProcessorRegistrationDelegate {
-
+	/**
+	 * 主要在Spring的BeanFactory初始化过程中做一些事情，通过一个实现了BeanDefinitionRegistryPostProcessor接口的类来实现做这些事情
+	 * @param beanFactory
+	 * @param beanFactoryPostProcessors
+	 */
 	public static void invokeBeanFactoryPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
 
 		// Invoke BeanDefinitionRegistryPostProcessors first, if any.
+		// Spring容器内部的后置处理器名字 的set集合
 		Set<String> processedBeans = new HashSet<>();
 
+		//如果当前的beanFactory是BeanDefinitionRegistry注册器，添加到后置处理器列表
 		if (beanFactory instanceof BeanDefinitionRegistry) {
 			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+			//普通beanFactory后置处理器
 			List<BeanFactoryPostProcessor> regularPostProcessors = new ArrayList<>();
+			//注册BeanFactory后置处理器
 			List<BeanDefinitionRegistryPostProcessor> registryProcessors = new ArrayList<>();
 
+			//执行-----自定义------的banfactory后置处理器,就是手动添加的beanFactoryPostProcessor，而不是使用@Component注入的
 			for (BeanFactoryPostProcessor postProcessor : beanFactoryPostProcessors) {
+				/**
+				 * 后置处理器是Bean定义注册的后置处理器
+				 * Spring容器把实现的接口分成两种：实现 BeanDefinitionRegistryPostProcessor 和实现 BeanFactoryPostProcessor
+				 * BeanDefinitionRegistryPostProcessor 扩展了 BeanFactoryPostProcessor
+				 */
 				if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
 					BeanDefinitionRegistryPostProcessor registryProcessor =
 							(BeanDefinitionRegistryPostProcessor) postProcessor;
+					//如果有自定义，则执行自定义注册bean工厂后置处理器中的postProcessBeanDefinitionRegistry方法
 					registryProcessor.postProcessBeanDefinitionRegistry(registry);
+					//添加到注册后置处理器
 					registryProcessors.add(registryProcessor);
-				}
-				else {
+				} else {
+					//普通bean工厂后置处理器
 					regularPostProcessors.add(postProcessor);
 				}
 			}
@@ -75,25 +91,48 @@ final class PostProcessorRegistrationDelegate {
 			// uninitialized to let the bean factory post-processors apply to them!
 			// Separate between BeanDefinitionRegistryPostProcessors that implement
 			// PriorityOrdered, Ordered, and the rest.
+			/**
+			 * currentRegistryProcessors 放的是Spring内部自己实现了BeanDefinitionRegistryPostProcessor接口的实现类
+			 * 维护的是一个对象集合
+			 */
 			List<BeanDefinitionRegistryPostProcessor> currentRegistryProcessors = new ArrayList<>();
 
 			// First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
-			//1、执行实现 PriorityOrdered的BeanDefinitionRegistryPostProcessors
+			/**
+			 * 委托多个实现了 BeanDefinitionRegistryPostProcessor 或者 BeanFactoryPostProcessor  接口的类来做BeanDefinition注册后置处理的事情
+			 * -----> 有自定义的也有Spring内部的
+			 *
+			 * BeanDefinitionRegistry的后置处理器执行也有先后顺序：
+			 * 1、执行实现了 	PriorityOrdered 的BeanDefinitionRegistryPostProcessors
+			 * 2、执行实现了 	Ordered         的BeanDefinitionRegistryPostProcessors
+			 * 3、执行		其他所有				BeanDefinitionRegistryPostProcessors
+			 *
+			 * ------------------------------------------------------------------------------------------------
+			 * beanFactory.getBeanNamesForType(xx.class)
+			 * 根据类型获取当前Spring容器内部定义的实现了BeanDefinitionRegistryPostProcessor接口的所有bean的名称
+			 */
 			String[] postProcessorNames =
 					beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
+			//当前beanFactory中，实现了PriorityOrdered接口的后置处理器
 			for (String ppName : postProcessorNames) {
 				if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
 					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
 					processedBeans.add(ppName);
 				}
 			}
+			//对list中的后置处理器排序
 			sortPostProcessors(currentRegistryProcessors, beanFactory);
+			//添加到后置处理器集合registryProcessors中，合并list
 			registryProcessors.addAll(currentRegistryProcessors);
+			/**
+			 * 执行当前Spring容器内部的bean定义注册后置处理器BeanDefinitionRegistryPostProcessor的postProcessBeanDefinitionRegistry
+			 * 注意：这里只是执行 postProcessBeanDefinitionRegistry 方法，并没有执行BeanFactoryPostProcessor的方法
+			 */
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
 			currentRegistryProcessors.clear();
 
 			// Next, invoke the BeanDefinitionRegistryPostProcessors that implement Ordered.
-			//2、执行实现了Ordered的BeanDefinitionRegistryPostProcessors
+			//2、当前beanFactory中，实现了 Ordered 接口的后置处理器
 			postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
 				if (!processedBeans.contains(ppName) && beanFactory.isTypeMatch(ppName, Ordered.class)) {
@@ -270,6 +309,7 @@ final class PostProcessorRegistrationDelegate {
 
 	/**
 	 * Invoke the given BeanDefinitionRegistryPostProcessor beans.
+	 * 执行 Spring容器内部 BeanDefinitionRegistryPostProcessor
 	 */
 	private static void invokeBeanDefinitionRegistryPostProcessors(
 			Collection<? extends BeanDefinitionRegistryPostProcessor> postProcessors, BeanDefinitionRegistry registry) {

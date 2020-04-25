@@ -180,8 +180,13 @@ public class AnnotationConfigUtils {
 		 * CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME="org.springframework.context.annotation.internalConfigurationAnnotationProcessor"
 		 */
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
-			//需要注意的是ConfigurationClassPostProcessor是一个BeanDefinitionRegistryPostProcessor
-			//而BeanDefinitionRegistryPostProcessor最终实现BeanFactoryPostProcessor这个接口
+			/**
+			 * 需要注意的是ConfigurationClassPostProcessor是一个BeanDefinitionRegistryPostProcessor
+			 * 而BeanDefinitionRegistryPostProcessor最终实现BeanFactoryPostProcessor这个接口
+			 * 在初始化过程中使用Spring容器委托实现了BeanFactoryPostProcessor
+			 * 或者BeanDefinitionRegistryPostProcessor的接口来实现BeanFactory的后置处理
+			 * ------>ConfigurationClassPostProcessor是Spring内部的实现类，如果不添加，就不能使用它在后续的后置处理过程中的操作
+			 */
 			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME));
