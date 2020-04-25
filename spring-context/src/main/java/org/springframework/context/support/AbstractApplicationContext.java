@@ -539,24 +539,32 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void refresh() throws BeansException, IllegalStateException {
 		synchronized (this.startupShutdownMonitor) {
 			// Prepare this context for refreshing.
-			//1、上下文刷新前的准备工作
+			/**
+			 * 1、上下文刷新前的准备工作
+			 * 准备工作包括：
+			 * 		设置启动时间
+			 * 		是否激活标志位
+			 * 		初始化属性源配置
+			 */
 			prepareRefresh();
 
 			// Tell the subclass to refresh the internal bean factory.
-			//2、获取BeanFactory-->DefaultListableBeanFactory
+			//2、得到内部维护的bean工厂： BeanFactory-->DefaultListableBeanFactory，因为要对factory进行初始化
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
-			//3、对bean工厂填充属性(Bean工厂初始化)--重要
+			//3、准备Bean工厂：BeanFactory(Bean工厂初始化)--重要
 			prepareBeanFactory( beanFactory );
 
 			try {
 				// Allows post-processing of the bean factory in context subclasses.
-				//4、BeanFactory 标准实例化后进行后置处理，留给子类实现，BeanFacotry初始化之后进行处理
+				//4、BeanFactory 标准实例化后对BeanFactory后置处理，留给子类实现，当前版本还没有具体实现
+				//Spring留给我们的扩展点之一
 				postProcessBeanFactory( beanFactory );
 
 				// Invoke factory processors registered as beans in the context.
-				/*
+				/**
+				 * 5、BeanFactory后置处理器(可以对BeanFactory中现有的BeanDefinition修改属性内容)
 				 * BeanFactoryPostProcessor：Bean工厂的Bean属性处理容器，
 				 * 说通俗一些就是可以管理我们的bean工厂内所有的beandefinition（未实例化）数据，可以随心所欲的修改属性。
 				 *
@@ -690,9 +698,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		// Tell the internal bean factory to use the context's class loader etc.
-		//bean的classloader
+		//添加Bean的类加载器
 		beanFactory.setBeanClassLoader( getClassLoader() );
-		//bean的表达式解析
+		//添加bean的表达式解析， 为了能够让我们的BeanFactory解析(使用该解析器去解析bean表达式)--bean表达式是什么
 		beanFactory.setBeanExpressionResolver( new StandardBeanExpressionResolver( beanFactory.getBeanClassLoader() ) );
 		//属性编辑器，该编辑器可以获取到Properties、xml、yml等配置文件
 		beanFactory.addPropertyEditorRegistrar( new ResourceEditorRegistrar( this, getEnvironment() ) );

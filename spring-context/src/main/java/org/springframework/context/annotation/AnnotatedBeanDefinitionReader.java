@@ -87,6 +87,8 @@ public class AnnotatedBeanDefinitionReader {
 		Assert.notNull(environment, "Environment must not be null");
 		this.registry = registry;
 		this.conditionEvaluator = new ConditionEvaluator(registry, environment, null);
+		//委托AnnotationConfigUtils的registerAnnotationConfigProcessors方法，注册Spring核心的几个PostProcessor对象
+		//最终调用的是registerPostProcessor方法(利用Java的引用传递，向registery中注册)
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
 
@@ -225,6 +227,7 @@ public class AnnotatedBeanDefinitionReader {
 							@Nullable Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
 		//为配置bean生成BeanDefinitation
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
+		//判断是否需要跳过解析
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
 			return;
 		}

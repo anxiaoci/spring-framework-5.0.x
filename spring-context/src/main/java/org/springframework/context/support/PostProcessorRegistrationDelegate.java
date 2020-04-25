@@ -129,9 +129,7 @@ final class PostProcessorRegistrationDelegate {
 			//1、执行所有processor是的回调
 			invokeBeanFactoryPostProcessors(registryProcessors, beanFactory);
 			invokeBeanFactoryPostProcessors(regularPostProcessors, beanFactory);
-		}
-
-		else {
+		}else {
 			// Invoke factory processors registered with the context instance.
 			//执行由上下文实例注册的工厂processor
 			invokeBeanFactoryPostProcessors(beanFactoryPostProcessors, beanFactory);
@@ -165,10 +163,12 @@ final class PostProcessorRegistrationDelegate {
 		}
 
 		// First, invoke the BeanFactoryPostProcessors that implement PriorityOrdered.
+		//执行Bean排序方法，改变Bean的初始化顺序
 		sortPostProcessors(priorityOrderedPostProcessors, beanFactory);
 		invokeBeanFactoryPostProcessors(priorityOrderedPostProcessors, beanFactory);
 
 		// Next, invoke the BeanFactoryPostProcessors that implement Ordered.
+		//再执行实现了Ordered接口的对象
 		List<BeanFactoryPostProcessor> orderedPostProcessors = new ArrayList<>();
 		for (String postProcessorName : orderedPostProcessorNames) {
 			orderedPostProcessors.add(beanFactory.getBean(postProcessorName, BeanFactoryPostProcessor.class));

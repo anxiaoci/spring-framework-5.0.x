@@ -48,6 +48,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 
 	/**
 	 * Shared default instance of {@code AnnotationAwareOrderComparator}.
+	 * 强制只能获取到单例对象
 	 */
 	public static final AnnotationAwareOrderComparator INSTANCE = new AnnotationAwareOrderComparator();
 
