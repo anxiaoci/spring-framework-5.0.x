@@ -16,23 +16,17 @@
 
 package org.springframework.context.support;
 
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.EmbeddedValueResolver;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.EmbeddedValueResolverAware;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.context.MessageSourceAware;
-import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.*;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
+
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor}
@@ -78,7 +72,7 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 	@Nullable
 	public Object postProcessBeforeInitialization(final Object bean, String beanName) throws BeansException {
 		AccessControlContext acc = null;
-
+		//做判断
 		if (System.getSecurityManager() != null &&
 				(bean instanceof EnvironmentAware || bean instanceof EmbeddedValueResolverAware ||
 						bean instanceof ResourceLoaderAware || bean instanceof ApplicationEventPublisherAware ||
@@ -93,13 +87,16 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 			}, acc);
 		}
 		else {
+			//重要执行方法
 			invokeAwareInterfaces(bean);
 		}
 
 		return bean;
 	}
 
+	//
 	private void invokeAwareInterfaces(Object bean) {
+		//判断bean实现了xxx接口，如果实现xxx接口，就把相对应的对象给你set到需要的地方
 		if (bean instanceof Aware) {
 			if (bean instanceof EnvironmentAware) {
 				((EnvironmentAware) bean).setEnvironment(this.applicationContext.getEnvironment());
@@ -116,6 +113,8 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 			if (bean instanceof MessageSourceAware) {
 				((MessageSourceAware) bean).setMessageSource(this.applicationContext);
 			}
+			//spring帮你set容器的ApplicationContext对象
+			//所以定义一个Bean实现了ApplicationContextAware接口，只需要实现setter方法，Spring容器就会给你set一个ApplicationContext
 			if (bean instanceof ApplicationContextAware) {
 				((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);
 			}
