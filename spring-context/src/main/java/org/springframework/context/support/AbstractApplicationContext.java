@@ -571,10 +571,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 				// Invoke factory processors registered as beans in the context.
 				/**
-				 * 5、BeanFactory后置处理器(可以对BeanFactory中现有的BeanDefinition修改属性内容)
+				 * 5、BeanFactory后置处理器(可以对BeanFactory中现有的 BeanDefinition 修改属性内容)
 				 * BeanFactoryPostProcessor：Bean工厂的Bean属性处理容器，是在register的时候注入的，在此时执行，在BeanDefinition阶段插手Bean
 				 * 的实例化过程，修改BeanDefinition的属性(此时Bean还没有实例化)
-				 *	------------------先执行自定义BeanFactory后置处理器，再执行Spring容器定义的----------------------------
+				 * --------------------------------------------------------------------------------
+				 * Spring容器启动时，初始化赋值reader时，注册了6个bd，1个为BeanFactoryPostProcessor，5个为BeanPostProcessor
+				 *	------------------执行自定义的和Spring容器定义BeanFactory后置处理器----------------------------
 				 * 5.1 执行自定义的Bean工厂后置处理器，扫描basePackage，主要加载包内@Bean、@Component等注解的类
 				 * 5.2 解析类成BeanDefinition对象，并且put进入beanDefinitionMap中（生成BeanDefinition的集合）
 				 * 5.3 再次执行bean工厂后置处理器完成cglib代理
@@ -710,6 +712,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		//添加bean的表达式解析， 为了能够让我们的BeanFactory解析(使用该解析器去解析bean表达式)--bean表达式是什么
 		beanFactory.setBeanExpressionResolver( new StandardBeanExpressionResolver( beanFactory.getBeanClassLoader() ) );
 		//添加属性编辑器，该编辑器可以获取到Properties、xml、yml等配置文件
+		//作用：对象与String之间的转换
 		beanFactory.addPropertyEditorRegistrar( new ResourceEditorRegistrar( this, getEnvironment() ) );
 
 		// Configure the bean factory with context callbacks.
@@ -730,6 +733,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// BeanFactory interface not registered as resolvable type in a plain factory.
 		// MessageSource registered (and found for autowiring) as a bean.
+		//依赖的替换，就是说后续如果需要用到比如说BeanFactory.class的对象，则用当前传入的beanFactory替换
 		beanFactory.registerResolvableDependency( BeanFactory.class, beanFactory );
 		beanFactory.registerResolvableDependency( ResourceLoader.class, this );
 		beanFactory.registerResolvableDependency( ApplicationEventPublisher.class, this );
@@ -748,8 +752,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			beanFactory.setTempClassLoader( new ContextTypeMatchClassLoader( beanFactory.getBeanClassLoader() ) );
 		}
 
-		// Register default environment beans.
-		//注册默认环境bean---Spring做的标准初始化，environment
+		/**
+		 * Register default environment beans.
+		 *
+		 * 如果Spring环境中没有名称分别为"environment"、"systemProperties"、"systemEnvironment"的bean，则手动添加
+		 */
+		//environment
 		if (!beanFactory.containsLocalBean( ENVIRONMENT_BEAN_NAME )) {
 			beanFactory.registerSingleton( ENVIRONMENT_BEAN_NAME, getEnvironment() );
 		}

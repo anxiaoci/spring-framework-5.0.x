@@ -50,7 +50,7 @@ import java.util.function.Supplier;
  * @see ClassPathBeanDefinitionScanner
  * @see org.springframework.context.support.GenericXmlApplicationContext
  * @since 3.0
- *
+ * <p>
  * Spring中用来解析注解bean的定义有两个：
  * AnnotationConfigApplicationContext和
  * AnnotationConfigWebApplicationContext。
@@ -82,14 +82,19 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	public AnnotationConfigApplicationContext() {
 		/**
 		 * 调用父类构造器，把BeanFactory赋值为DefaultListableBeanFactory
-		 */
-		/**
 		 * 初始化注解模式下的bean定义扫描器
 		 * 作用：BeanDefinition读取器
+		 * ---->在初始化过程中，注册了6个BeanDefinition
 		 */
 		this.reader = new AnnotatedBeanDefinitionReader( this );
 		/**
-		 * 作用：BeanDefinition扫描器，扫描classpath下类生成BeanDefinition
+		 * 作用：BeanDefinition扫描器，扫描包或者类转化为BeanDefinition
+		 *	但是实际上我们在Spring容器启动中扫描包用的并不是这个scanner来完成的
+		 *	而是Spring自己new出来的一个ClassPathBeanDefinitionScanner对象
+		 *
+		 *	因此，这里的scanner只是为了程序员自己手动调用AnnotationConfigApplicationContext的scanner的scan方法手动扫描
+		 *
+		 *
 		 */
 		this.scanner = new ClassPathBeanDefinitionScanner( this );
 	}
@@ -100,9 +105,9 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @param beanFactory the DefaultListableBeanFactory instance to use for this context
 	 */
 	public AnnotationConfigApplicationContext(DefaultListableBeanFactory beanFactory) {
-		super(beanFactory);
-		this.reader = new AnnotatedBeanDefinitionReader(this);
-		this.scanner = new ClassPathBeanDefinitionScanner(this);
+		super( beanFactory );
+		this.reader = new AnnotatedBeanDefinitionReader( this );
+		this.scanner = new ClassPathBeanDefinitionScanner( this );
 	}
 
 	/**
@@ -141,7 +146,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 */
 	public AnnotationConfigApplicationContext(String... basePackages) {
 		this();
-		scan(basePackages);
+		scan( basePackages );
 		refresh();
 	}
 
@@ -152,9 +157,9 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 */
 	@Override
 	public void setEnvironment(ConfigurableEnvironment environment) {
-		super.setEnvironment(environment);
-		this.reader.setEnvironment(environment);
-		this.scanner.setEnvironment(environment);
+		super.setEnvironment( environment );
+		this.reader.setEnvironment( environment );
+		this.scanner.setEnvironment( environment );
 	}
 
 	/**
@@ -168,10 +173,10 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @see ClassPathBeanDefinitionScanner#setBeanNameGenerator
 	 */
 	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
-		this.reader.setBeanNameGenerator(beanNameGenerator);
-		this.scanner.setBeanNameGenerator(beanNameGenerator);
+		this.reader.setBeanNameGenerator( beanNameGenerator );
+		this.scanner.setBeanNameGenerator( beanNameGenerator );
 		getBeanFactory().registerSingleton(
-				AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, beanNameGenerator);
+				AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, beanNameGenerator );
 	}
 
 	/**
@@ -181,8 +186,8 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * and/or {@link #scan(String...)}.
 	 */
 	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
-		this.reader.setScopeMetadataResolver(scopeMetadataResolver);
-		this.scanner.setScopeMetadataResolver(scopeMetadataResolver);
+		this.reader.setScopeMetadataResolver( scopeMetadataResolver );
+		this.scanner.setScopeMetadataResolver( scopeMetadataResolver );
 	}
 
 
@@ -202,8 +207,8 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 */
 	@Override
 	public void register(Class<?>... annotatedClasses) {
-		Assert.notEmpty(annotatedClasses, "At least one annotated class must be specified");
-		this.reader.register(annotatedClasses);
+		Assert.notEmpty( annotatedClasses, "At least one annotated class must be specified" );
+		this.reader.register( annotatedClasses );
 	}
 
 	/**
@@ -217,8 +222,8 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 */
 	@Override
 	public void scan(String... basePackages) {
-		Assert.notEmpty(basePackages, "At least one base package must be specified");
-		this.scanner.scan(basePackages);
+		Assert.notEmpty( basePackages, "At least one base package must be specified" );
+		this.scanner.scan( basePackages );
 	}
 
 
@@ -240,7 +245,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @since 5.0
 	 */
 	public <T> void registerBean(Class<T> annotatedClass, Object... constructorArguments) {
-		registerBean(null, annotatedClass, constructorArguments);
+		registerBean( null, annotatedClass, constructorArguments );
 	}
 
 	/**
@@ -257,19 +262,19 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @since 5.0
 	 */
 	public <T> void registerBean(@Nullable String beanName, Class<T> annotatedClass, Object... constructorArguments) {
-		this.reader.doRegisterBean(annotatedClass, null, beanName, null,
+		this.reader.doRegisterBean( annotatedClass, null, beanName, null,
 				bd -> {
 					for (Object arg : constructorArguments) {
-						bd.getConstructorArgumentValues().addGenericArgumentValue(arg);
+						bd.getConstructorArgumentValues().addGenericArgumentValue( arg );
 					}
-				});
+				} );
 	}
 
 	@Override
 	public <T> void registerBean(@Nullable String beanName, Class<T> beanClass, @Nullable Supplier<T> supplier,
 								 BeanDefinitionCustomizer... customizers) {
 
-		this.reader.doRegisterBean(beanClass, supplier, beanName, null, customizers);
+		this.reader.doRegisterBean( beanClass, supplier, beanName, null, customizers );
 	}
 
 }
