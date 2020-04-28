@@ -289,8 +289,9 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 				candidate.setScope(scopeMetadata.getScopeName());
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
-				//如果这个类是AbstractBeanDefinitiond的子类，则为它设置默认值，比如lazy、init、destroy
+				//扫描的BeanDefinition 继承了AbstractBeanDefinition，会进入此if内
 				if (candidate instanceof AbstractBeanDefinition) {
+					//扫描出来的则为它设置默认值，比如lazy、init、destroy
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
 				//如果是AnnotatedBeanDefinition(加了注解的类)，检查并处理常用注解，把常用注解的值设置到AnnotatedBeanDefinition中去

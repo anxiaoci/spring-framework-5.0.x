@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
  * @decription:
  */
 @Configuration
-@ComponentScan("com.juan")
+@ComponentScan(value = "com.juan")
 public class AppConfig {
 
 	@Bean

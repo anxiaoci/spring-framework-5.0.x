@@ -310,17 +310,17 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		// Parse each @Configuration class
-		// 实例化 ConfigurationClassParser ，为了解析各个配置类
+		// 实例化 ConfigurationClassParser 配置类解析器
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,
 				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
 
-		// configCandidates为添加了@Component等注解的bean，放到set中去重
+		// 实例化两个set，candidates用于将上面获取到的 configCandidates 去重
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
 		//alreadyParsed 判断是否处理过
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
-			//扫描包 -----此过程把我们使用@Component注解的类扫描到Spring容器中，使Spring容器持有其BeanDefinition
+			//Spring容器中配置类 解析器，Spring容器核心解析
 			parser.parse(candidates);
 
 			parser.validate();
