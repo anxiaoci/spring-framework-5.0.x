@@ -253,6 +253,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 *
 	 * @param basePackages the packages to check for annotated classes
 	 * @return number of beans registered
+	 * 扫描包
 	 */
 	public int scan(String... basePackages) {
 		int beanCountAtScanStart = this.registry.getBeanDefinitionCount();
