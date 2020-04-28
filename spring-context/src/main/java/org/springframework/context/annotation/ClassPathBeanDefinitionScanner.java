@@ -290,15 +290,18 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 				candidate.setScope(scopeMetadata.getScopeName());
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
-				//扫描的BeanDefinition 继承了AbstractBeanDefinition，会进入此if内
+				//扫描的普通BeanDefinition (ScannedGenericBeanDefinition)继承了AbstractBeanDefinition，会进入此if内
+				//此时设置的是@ComponentScan上给扫描类设置的默认值
 				if (candidate instanceof AbstractBeanDefinition) {
 					//扫描出来的则为它设置默认值，比如lazy、init、destroy
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
 				//如果是AnnotatedBeanDefinition(加了注解的类)，检查并处理常用注解，把常用注解的值设置到AnnotatedBeanDefinition中去
+				//此时是给扫描类设置在自己的类定义上面添加的常用注解，例如自己设置的@Lazy
 				if (candidate instanceof AnnotatedBeanDefinition) {
 					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
+				//
 				if (checkCandidate(beanName, candidate)) {
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
 					definitionHolder =
@@ -320,6 +323,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @param beanName       the generated bean name for the given bean
 	 */
 	protected void postProcessBeanDefinition(AbstractBeanDefinition beanDefinition, String beanName) {
+		//此时会把之前放在scanner的beanDefinitionDefaults的属性内容放到BeanDefinition中
 		beanDefinition.applyDefaults(this.beanDefinitionDefaults);
 		if (this.autowireCandidatePatterns != null) {
 			beanDefinition.setAutowireCandidate(PatternMatchUtils.simpleMatch(this.autowireCandidatePatterns, beanName));

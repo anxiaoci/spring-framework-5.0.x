@@ -66,9 +66,10 @@ class ComponentScanAnnotationParser {
 
 	/**
 	 * 扫描bean的基本信息
-	 * @param componentScan
+	 * @param componentScan 为类设置的属性在componentScan的属性中
 	 * @param declaringClass
 	 * @return
+	 * 在最后使用scanner最终扫描之前，先把默认属性放在scanner的beanDefinitionDefaults属性中，在执行扫描时把默认属性赋值给扫描
 	 */
 	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, final String declaringClass) {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this.registry,

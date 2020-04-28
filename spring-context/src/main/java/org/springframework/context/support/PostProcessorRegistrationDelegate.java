@@ -39,6 +39,7 @@ import java.util.*;
 final class PostProcessorRegistrationDelegate {
 	/**
 	 * 主要在Spring的BeanFactory初始化过程中做一些事情，通过一个实现了BeanDefinitionRegistryPostProcessor接口的类来实现做这些事情
+	 *
 	 * @param beanFactory
 	 * @param beanFactoryPostProcessors
 	 */
@@ -159,9 +160,11 @@ final class PostProcessorRegistrationDelegate {
 			 * 以上执行的是 BeanDefinitionRegistryPostProcessor 的 postProcessBeanDefinitionRegistry
 			 * 现在执行的是 父类BeanFactoryPostProcessor 中的 postProcessBeanFactory
 			 */
+			//执行 实现 BeanDefinitionRegistryPostProcessor 的 BeanFactoryPostPeocessor的方法
 			invokeBeanFactoryPostProcessors(registryProcessors, beanFactory);
+			//执行自定义的 BeanFactoryPostProcessor
 			invokeBeanFactoryPostProcessors(regularPostProcessors, beanFactory);
-		}else {
+		} else {
 			// Invoke factory processors registered with the context instance.
 			//执行由上下文实例注册的工厂processor
 			invokeBeanFactoryPostProcessors(beanFactoryPostProcessors, beanFactory);
@@ -182,14 +185,13 @@ final class PostProcessorRegistrationDelegate {
 		for (String ppName : postProcessorNames) {
 			if (processedBeans.contains(ppName)) {
 				// skip - already processed in first phase above
-			}
-			else if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
+			} else if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
+				//这里添加的是实现priorityOrdered接口的PostProcessor
 				priorityOrderedPostProcessors.add(beanFactory.getBean(ppName, BeanFactoryPostProcessor.class));
-			}
-			else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
+			} else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
+				//对于实现Ordered接口的PostProcessor，只是获取其名字，后续处理？？？为什么要这样设计
 				orderedPostProcessorNames.add(ppName);
-			}
-			else {
+			} else {
 				nonOrderedPostProcessorNames.add(ppName);
 			}
 		}
@@ -209,6 +211,7 @@ final class PostProcessorRegistrationDelegate {
 		invokeBeanFactoryPostProcessors(orderedPostProcessors, beanFactory);
 
 		// Finally, invoke all other BeanFactoryPostProcessors.
+		//执行其他BeanFactoryPostProcessors
 		List<BeanFactoryPostProcessor> nonOrderedPostProcessors = new ArrayList<>();
 		for (String postProcessorName : nonOrderedPostProcessorNames) {
 			nonOrderedPostProcessors.add(beanFactory.getBean(postProcessorName, BeanFactoryPostProcessor.class));
@@ -244,11 +247,9 @@ final class PostProcessorRegistrationDelegate {
 				if (pp instanceof MergedBeanDefinitionPostProcessor) {
 					internalPostProcessors.add(pp);
 				}
-			}
-			else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
+			} else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
 				orderedPostProcessorNames.add(ppName);
-			}
-			else {
+			} else {
 				nonOrderedPostProcessorNames.add(ppName);
 			}
 		}
