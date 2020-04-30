@@ -79,7 +79,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 *                 of a {@code BeanDefinitionRegistry}
 	 */
 	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry) {
-		this( registry, true );
+		this(registry, true);
 	}
 
 	/**
@@ -108,7 +108,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @see #setEnvironment
 	 */
 	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters) {
-		this( registry, useDefaultFilters, getOrCreateEnvironment( registry ) );
+		this(registry, useDefaultFilters, getOrCreateEnvironment(registry));
 	}
 
 	/**
@@ -136,8 +136,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters,
 										  Environment environment) {
 
-		this( registry, useDefaultFilters, environment,
-				(registry instanceof ResourceLoader ? (ResourceLoader) registry : null) );
+		this(registry, useDefaultFilters, environment,
+				(registry instanceof ResourceLoader ? (ResourceLoader) registry : null));
 	}
 
 	/**
@@ -160,14 +160,14 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 			, boolean useDefaultFilters,
 										  Environment environment, @Nullable ResourceLoader resourceLoader) {
 
-		Assert.notNull( registry, "BeanDefinitionRegistry must not be null" );
+		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		this.registry = registry;
 
 		if (useDefaultFilters) {
 			registerDefaultFilters();
 		}
-		setEnvironment( environment );
-		setResourceLoader( resourceLoader );
+		setEnvironment(environment);
+		setResourceLoader(resourceLoader);
 	}
 
 
@@ -235,7 +235,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @see #setScopeMetadataResolver
 	 */
 	public void setScopedProxyMode(ScopedProxyMode scopedProxyMode) {
-		this.scopeMetadataResolver = new AnnotationScopeMetadataResolver( scopedProxyMode );
+		this.scopeMetadataResolver = new AnnotationScopeMetadataResolver(scopedProxyMode);
 	}
 
 	/**
@@ -258,11 +258,11 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	public int scan(String... basePackages) {
 		int beanCountAtScanStart = this.registry.getBeanDefinitionCount();
 
-		doScan( basePackages );
+		doScan(basePackages);
 
 		// Register annotation config processors, if necessary.
 		if (this.includeAnnotationConfig) {
-			AnnotationConfigUtils.registerAnnotationConfigProcessors( this.registry );
+			AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 		}
 
 		return (this.registry.getBeanDefinitionCount() - beanCountAtScanStart);
@@ -280,32 +280,35 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @return set of beans registered if any for tooling registration purposes (never {@code null})
 	 */
 	protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
-		Assert.notEmpty( basePackages, "At least one base package must be specified" );
+		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
 		for (String basePackage : basePackages) {
 			//扫描basePackage下的java文件，转为BeanDefinition
-			Set<BeanDefinition> candidates = findCandidateComponents( basePackage );
+			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
 			for (BeanDefinition candidate : candidates) {
 				//解析Scope属性
-				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata( candidate );
-				candidate.setScope( scopeMetadata.getScopeName() );
-				String beanName = this.beanNameGenerator.generateBeanName( candidate, this.registry );
-				//扫描的BeanDefinition 继承了AbstractBeanDefinition，会进入此if内
+				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+				candidate.setScope(scopeMetadata.getScopeName());
+				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
+				//扫描的普通BeanDefinition (ScannedGenericBeanDefinition)继承了AbstractBeanDefinition，会进入此if内
+				//此时设置的是@ComponentScan上给扫描类设置的默认值
 				if (candidate instanceof AbstractBeanDefinition) {
 					//扫描出来的则为它设置默认值，比如lazy、init、destroy
-					postProcessBeanDefinition( (AbstractBeanDefinition) candidate, beanName );
+					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
 				//如果是AnnotatedBeanDefinition(加了注解的类)，检查并处理常用注解，把常用注解的值设置到AnnotatedBeanDefinition中去
+				//此时是给扫描类设置在自己的类定义上面添加的常用注解，例如自己设置的@Lazy
 				if (candidate instanceof AnnotatedBeanDefinition) {
-					AnnotationConfigUtils.processCommonDefinitionAnnotations( (AnnotatedBeanDefinition) candidate );
+					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
-				if (checkCandidate( beanName, candidate )) {
-					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder( candidate, beanName );
+				//检查
+				if (checkCandidate(beanName, candidate)) {
+					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
 					definitionHolder =
-							AnnotationConfigUtils.applyScopedProxyMode( scopeMetadata, definitionHolder, this.registry );
-					beanDefinitions.add( definitionHolder );
+							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+					beanDefinitions.add(definitionHolder);
 					//把BeanDefinition放入到Spring容器的map中
-					registerBeanDefinition( definitionHolder, this.registry );
+					registerBeanDefinition(definitionHolder, this.registry);
 				}
 			}
 		}
@@ -320,9 +323,10 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @param beanName       the generated bean name for the given bean
 	 */
 	protected void postProcessBeanDefinition(AbstractBeanDefinition beanDefinition, String beanName) {
-		beanDefinition.applyDefaults( this.beanDefinitionDefaults );
+		//此时会把之前放在scanner的beanDefinitionDefaults的属性内容放到BeanDefinition中
+		beanDefinition.applyDefaults(this.beanDefinitionDefaults);
 		if (this.autowireCandidatePatterns != null) {
-			beanDefinition.setAutowireCandidate( PatternMatchUtils.simpleMatch( this.autowireCandidatePatterns, beanName ) );
+			beanDefinition.setAutowireCandidate(PatternMatchUtils.simpleMatch(this.autowireCandidatePatterns, beanName));
 		}
 	}
 

@@ -150,7 +150,6 @@ class ConfigurationClassParser {
 		for (BeanDefinitionHolder holder : configCandidates) {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
-				//如果是配置bean，也就是被@Configuration注解的bean
 				/**
 				 * 解析注解对象，并把解析出来的bd放入map
 				 */
@@ -223,7 +222,7 @@ class ConfigurationClassParser {
 		}
 
 		//从map中拿出来的 ConfigurationClass是什么 ？？？为什么要用两个来处理？？？这里要看怎么put进去的，需要合并？？？
-		//处理Imported的情况(就是当前被解析的类有没有被别的类通过@Import引入)
+		//处理当前类被其他类通过@Import方式引入的情况
 		ConfigurationClass existingClass = this.configurationClasses.get( configClass );
 		if (existingClass != null) {
 			if (configClass.isImported()) {

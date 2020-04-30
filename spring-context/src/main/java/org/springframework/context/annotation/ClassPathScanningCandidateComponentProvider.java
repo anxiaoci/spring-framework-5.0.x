@@ -305,6 +305,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * ASM实现包扫描
 	 */
 	public Set<BeanDefinition> findCandidateComponents(String basePackage) {
+		//使用索引扫描，可以加快扫描速度
 		if (this.componentsIndex != null && indexSupportsIncludeFilters()) {
 			return addCandidateComponentsFromIndex(this.componentsIndex, basePackage);
 		} else {
@@ -426,6 +427,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 						MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
 						if (isCandidateComponent(metadataReader)) {
 							//被扫描的注入到Spring容器的bean，使用ScannedGenericBeanDefinition来定义其BeanDefinition
+							//被扫描的类在此时才会创建BeanDefinition
 							ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
 							sbd.setResource(resource);
 							sbd.setSource(resource);
