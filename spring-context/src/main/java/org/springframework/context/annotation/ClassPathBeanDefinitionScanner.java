@@ -339,7 +339,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @param registry         the BeanDefinitionRegistry to register the bean with
 	 */
 	protected void registerBeanDefinition(BeanDefinitionHolder definitionHolder, BeanDefinitionRegistry registry) {
-		BeanDefinitionReaderUtils.registerBeanDefinition( definitionHolder, registry );
+		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, registry);
 	}
 
 
@@ -356,20 +356,20 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 *                                            bean definition has been found for the specified name
 	 */
 	protected boolean checkCandidate(String beanName, BeanDefinition beanDefinition) throws IllegalStateException {
-		if (!this.registry.containsBeanDefinition( beanName )) {
+		if (!this.registry.containsBeanDefinition(beanName)) {
 			return true;
 		}
-		BeanDefinition existingDef = this.registry.getBeanDefinition( beanName );
+		BeanDefinition existingDef = this.registry.getBeanDefinition(beanName);
 		BeanDefinition originatingDef = existingDef.getOriginatingBeanDefinition();
 		if (originatingDef != null) {
 			existingDef = originatingDef;
 		}
-		if (isCompatible( beanDefinition, existingDef )) {
+		if (isCompatible(beanDefinition, existingDef)) {
 			return false;
 		}
-		throw new ConflictingBeanDefinitionException( "Annotation-specified bean name '" + beanName +
+		throw new ConflictingBeanDefinitionException("Annotation-specified bean name '" + beanName +
 				"' for bean class [" + beanDefinition.getBeanClassName() + "] conflicts with existing, " +
-				"non-compatible bean definition of same name and class [" + existingDef.getBeanClassName() + "]" );
+				"non-compatible bean definition of same name and class [" + existingDef.getBeanClassName() + "]");
 	}
 
 	/**
@@ -386,8 +386,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 */
 	protected boolean isCompatible(BeanDefinition newDefinition, BeanDefinition existingDefinition) {
 		return (!(existingDefinition instanceof ScannedGenericBeanDefinition) ||  // explicitly registered overriding bean
-				(newDefinition.getSource() != null && newDefinition.getSource().equals( existingDefinition.getSource() )) ||  // scanned same file twice
-				newDefinition.equals( existingDefinition ));  // scanned equivalent class twice
+				(newDefinition.getSource() != null && newDefinition.getSource().equals(existingDefinition.getSource())) ||  // scanned same file twice
+				newDefinition.equals(existingDefinition));  // scanned equivalent class twice
 	}
 
 
@@ -396,7 +396,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * StandardEnvironment.
 	 */
 	private static Environment getOrCreateEnvironment(BeanDefinitionRegistry registry) {
-		Assert.notNull( registry, "BeanDefinitionRegistry must not be null" );
+		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		if (registry instanceof EnvironmentCapable) {
 			return ((EnvironmentCapable) registry).getEnvironment();
 		}
