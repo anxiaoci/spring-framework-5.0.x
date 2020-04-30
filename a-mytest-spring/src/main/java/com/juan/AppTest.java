@@ -12,11 +12,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  * @date 2020/4/1
  * @decription:
  */
-
-/**
- * 解析@Import时，@ImportSource
- */
-
 public class AppTest {
 	public static void main(String[] args) {
 		//初始化Spring容器
