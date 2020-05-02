@@ -76,7 +76,9 @@ class ConfigurationClassEnhancer {
 	// The callbacks to use. Note that these callbacks must be stateless.
 	//cglib动态代理的callback
 	private static final Callback[] CALLBACKS = new Callback[]{
+			//增强方法，主要用于控制bean的作用域，不让每一次都去调用new方法
 			new BeanMethodInterceptor(),
+			//用于获取BeanFactory
 			new BeanFactoryAwareMethodInterceptor(),
 			NoOp.INSTANCE
 	};
@@ -98,6 +100,7 @@ class ConfigurationClassEnhancer {
 	 * @return 代理类
 	 */
 	public Class<?> enhance(Class<?> configClass, @Nullable ClassLoader classLoader) {
+		//创建代理之前先检查是否已经被代理过(判断是否实现了EnhancedConfiguration接口，因为生成cglib动态代理过程中，给代理set了interface EnhancedConfiguration)
 		if (EnhancedConfiguration.class.isAssignableFrom(configClass)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Ignoring request to enhance %s as it has " +
@@ -369,6 +372,8 @@ class ConfigurationClassEnhancer {
 				}
 			}
 
+			//在这个代码段中判断是new还是get
+			//返回true，去new
 			if (isCurrentlyInvokedFactoryMethod(beanMethod)) {
 				// The factory is calling the bean method in order to instantiate and register the bean
 				// (i.e. via a getBean() call) -> invoke the super implementation of the method to actually
@@ -383,6 +388,8 @@ class ConfigurationClassEnhancer {
 									"these container lifecycle issues; see @Bean javadoc for complete details.",
 							beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName()));
 				}
+				//第一次创建，new
+				//cglib动态代理是继承需要代理的类，因此这里使用执行父类(被代理类)方法来创建对象
 				return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
 			}
 
@@ -421,7 +428,7 @@ class ConfigurationClassEnhancer {
 						}
 					}
 				}
-				//从工厂中获取
+				//从BeanFactory中获取bean，而不是每次都去获取
 				Object beanInstance = (useArgs ? beanFactory.getBean(beanName, beanMethodArgs) :
 						beanFactory.getBean(beanName));
 				if (!ClassUtils.isAssignableValue(beanMethod.getReturnType(), beanInstance)) {
@@ -502,6 +509,26 @@ class ConfigurationClassEnhancer {
 		 * factory method. Compares method name and parameter types only in order to work
 		 * around a potential problem with covariant return types (currently only known
 		 * to happen on Groovy classes).
+		 * 判断代理方法和执行方法是否是同一个方法来判断是否是正在创建
+		 * --------------------判断思路-----------------------------
+		 * A{
+		 *     method1(){
+		 *
+		 *     }
+		 *
+		 *     method2(){
+		 *         method1();
+		 *     }
+		 * }
+		 *
+		 * public Object intercept(Object enhancedConfigInstance, Method beanMethod, Object[] beanMethodArgs,
+		 * 								MethodProxy cglibMethodProxy)
+		 * 	为类A创建动态代理执行方法时,会代理类中的每个定义方法，也就是说在执行过程中，执行method1和method2时，
+		 * 	调用方法和执行方法是同一个方法，此时可以判断为是第一次调用
+		 *
+		 * 	但是对于method2中调用method1，在方法中的调用，此时的method1就是原始方法，
+		 * 	此时 beanMethod是原始方法，cglibMethodProxy是代理方法menthod2(调用方法)
+		 * --------------------------------------------------------
 		 */
 		private boolean isCurrentlyInvokedFactoryMethod(Method method) {
 			Method currentlyInvoked = SimpleInstantiationStrategy.getCurrentlyInvokedFactoryMethod();
