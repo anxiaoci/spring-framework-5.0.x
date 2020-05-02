@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  * @date 2020/4/10
  * @decription:
  */
-
+@Component
 public class MyBeanFactoryPostProcessor implements BeanDefinitionRegistryPostProcessor {
 	/**
 	 * Modify the application context's internal bean factory after its standard
@@ -25,13 +25,9 @@ public class MyBeanFactoryPostProcessor implements BeanDefinitionRegistryPostPro
 	 */
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		System.out.println( "-----------------------------" );
-		System.out.println("name--->"+beanFactory.getClass().getName());
-		System.out.println( "-----------------------------" );
 	}
 
 	@Override
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-		System.out.println("--------------MyBeanFactoryPostProcessor");
 	}
 }

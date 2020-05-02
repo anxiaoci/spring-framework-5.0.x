@@ -107,6 +107,7 @@ class ConfigurationClassEnhancer {
 			}
 			return configClass;
 		}
+		//创建代理config类
 		Class<?> enhancedClass = createClass(newEnhancer(configClass, classLoader));
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Successfully enhanced %s; enhanced class name is: %s",
@@ -120,10 +121,20 @@ class ConfigurationClassEnhancer {
 	 */
 	private Enhancer newEnhancer(Class<?> configSuperClass, @Nullable ClassLoader classLoader) {
 		Enhancer enhancer = new Enhancer();
+		//设置父类，cglib动态代理是基于继承来的
 		enhancer.setSuperclass(configSuperClass);
+		//增强接口，EnhancedConfiguration实现了BeanFactoryAware ，可以获取到BeanFactory
+		//当出现重复获取Singleton实例时，从BeanFactory中获取(类似于单例中原型属性时的处理方式，原型注入的属性每次都从BeanFactory中获取)
+		//代理对象实现EnhancedConfiguration这个接口
 		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
+
 		enhancer.setUseFactory(false);
+		//代理命名策略
 		enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
+		/**
+		 * Spring使用CGlib生成类的策略，主要为生成的CGLIB类中添加成员变量$$beanFactory
+		 * 同时，基于EnhancedConfiguration的父接口BeanFactoryAware中的setBeanFactory方法，设置此变量的值为当前Context中的BeanFactory
+		 */
 		enhancer.setStrategy(new BeanFactoryAwareGeneratorStrategy(classLoader));
 		enhancer.setCallbackFilter(CALLBACK_FILTER);
 		enhancer.setCallbackTypes(CALLBACK_FILTER.getCallbackTypes());
@@ -207,6 +218,7 @@ class ConfigurationClassEnhancer {
 	 * Custom extension of CGLIB's DefaultGeneratorStrategy, introducing a {@link BeanFactory} field.
 	 * Also exposes the application ClassLoader as thread context ClassLoader for the time of
 	 * class generation (in order for ASM to pick it up when doing common superclass resolution).
+	 * 默认的BeanFactoryAware生成BeanFactory的生成策略
 	 */
 	private static class BeanFactoryAwareGeneratorStrategy extends DefaultGeneratorStrategy {
 

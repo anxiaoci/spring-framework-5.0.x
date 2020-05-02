@@ -120,6 +120,7 @@ abstract class ConfigurationClassUtils {
 				return false;
 			}
 		}
+		//把register中初始化放入的几个bd扫描，判断注解(我们比较关心的是Appconfig上添加的注解)
 		if (isFullConfigurationCandidate(metadata)) {
 			//使用@Configuration注解
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);

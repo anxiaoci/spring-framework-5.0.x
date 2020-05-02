@@ -302,7 +302,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 *
 	 * @param basePackage the package to check for annotated classes
 	 * @return a corresponding Set of autodetected bean definitions
-	 * ASM实现包扫描
+	 * ASM实现包扫描，asm读取class文件
 	 */
 	public Set<BeanDefinition> findCandidateComponents(String basePackage) {
 		//使用索引扫描，可以加快扫描速度
@@ -415,6 +415,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 			//basePackage及其子包
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					resolveBasePackage(basePackage) + '/' + this.resourcePattern;
+			//asm读取class文件
 			Resource[] resources = getResourcePatternResolver().getResources(packageSearchPath);
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
@@ -425,6 +426,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 				if (resource.isReadable()) {
 					try {
 						MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
+						//判断是否在excludeFilter、includeFilter
 						if (isCandidateComponent(metadataReader)) {
 							//被扫描的注入到Spring容器的bean，使用ScannedGenericBeanDefinition来定义其BeanDefinition
 							//被扫描的类在此时才会创建BeanDefinition

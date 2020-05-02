@@ -6,6 +6,7 @@ package com.juan;/**
 import com.juan.config.AppConfig;
 import com.juan.config.MyBeanFactoryPostProcessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author admin
@@ -23,8 +24,10 @@ public class AppTest {
 		AnnotationConfigApplicationContext applicationContext
 				= new AnnotationConfigApplicationContext();
 		applicationContext.register(AppConfig.class);
-		applicationContext.addBeanFactoryPostProcessor(new MyBeanFactoryPostProcessor());
+//		applicationContext.addBeanFactoryPostProcessor(new MyBeanFactoryPostProcessor());
 		applicationContext.refresh();
+		System.out.println("00000000000000000000");
+//		System.out.println(Import.class.getName());
 //		applicationContext.getBean(TestService.class).hashCode();
 
 
