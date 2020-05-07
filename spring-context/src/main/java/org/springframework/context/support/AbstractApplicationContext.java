@@ -790,9 +790,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
 		/**
-		 * getBeanFactoryPostProcessors获取自己-自定义的beanFactoryPostProcessors
 		 * 自定义的BeanPostProcessor是在初始化过程中通过applicationContext.addBeanFactoryPostProcessor(xxx);添加进去的
 		 * 所谓自定义就是，没有添加@Component等注解并且又注入的bean
+		 * beanFactory:Spring容器内部的bean工厂
+		 * getBeanFactoryPostProcessors：程序员自定义的beanFactoryPostProcessors(通过add的方式放进去的)
 		 */
 		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
 

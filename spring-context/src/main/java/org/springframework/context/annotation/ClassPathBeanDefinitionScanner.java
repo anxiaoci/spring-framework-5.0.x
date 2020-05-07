@@ -269,8 +269,6 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	}
 
 	/**
-	 * 1、扫描指定路径 backPackage，生成beanDefinitions的set集合
-	 * 2、把BeanDefinition放入到Spring容器的map中
 	 * Perform a scan within the specified base packages,
 	 * returning the registered bean definitions.
 	 * <p>This method does <i>not</i> register an annotation config processor
@@ -278,6 +276,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 *
 	 * @param basePackages the packages to check for annotated classes
 	 * @return set of beans registered if any for tooling registration purposes (never {@code null})
+	 * 	1、扫描指定路径 backPackage，生成beanDefinitions的set集合
+	 * 	2、把BeanDefinition放入到Spring容器的map中
 	 */
 	protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
@@ -304,6 +304,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 				//检查
 				if (checkCandidate(beanName, candidate)) {
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+					//web应用
 					definitionHolder =
 							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 					beanDefinitions.add(definitionHolder);

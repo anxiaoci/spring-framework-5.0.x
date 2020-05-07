@@ -50,7 +50,7 @@ final class PostProcessorRegistrationDelegate {
 		// Spring容器内部的后置处理器名字 的set集合
 		Set<String> processedBeans = new HashSet<>();
 
-		//如果当前的beanFactory是BeanDefinitionRegistry注册器，添加到后置处理器列表
+		//处理beanFactory作为BeanDefinitionRegistry bd注册器部分
 		if (beanFactory instanceof BeanDefinitionRegistry) {
 			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
 			//普通beanFactory后置处理器
@@ -58,12 +58,17 @@ final class PostProcessorRegistrationDelegate {
 			//注册BeanFactory后置处理器
 			List<BeanDefinitionRegistryPostProcessor> registryProcessors = new ArrayList<>();
 
-			//执行-----自定义------的banfactory后置处理器,就是手动添加的beanFactoryPostProcessor，而不是使用@Component注入的
+			/**
+			 * Spring框架中自定义BeanFactoryPostProcessor注入的方式：手动add添加，@Component等注解扫描
+			 * 此处处理的是使用add手动添加的后置处理器
+			 */
 			for (BeanFactoryPostProcessor postProcessor : beanFactoryPostProcessors) {
 				/**
-				 * 后置处理器是Bean定义注册的后置处理器
 				 * Spring容器把实现的接口分成两种：实现 BeanDefinitionRegistryPostProcessor 和实现 BeanFactoryPostProcessor
 				 * BeanDefinitionRegistryPostProcessor 扩展了 BeanFactoryPostProcessor
+				 * BeanDefinitionRegistryPostProcessor有两个接口：
+				 * 	（1）postProcessBeanDefinitionRegistry  当前先执行这个方法
+				 * 	（2）postProcessBeanFactory
 				 */
 				if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
 					BeanDefinitionRegistryPostProcessor registryProcessor =
@@ -84,27 +89,22 @@ final class PostProcessorRegistrationDelegate {
 			// PriorityOrdered, Ordered, and the rest.
 			/**
 			 * currentRegistryProcessors 放的是Spring内部自己实现了BeanDefinitionRegistryPostProcessor接口的实现类
-			 * 维护的是一个对象集合
 			 */
 			List<BeanDefinitionRegistryPostProcessor> currentRegistryProcessors = new ArrayList<>();
 
 			// First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
 			/**
-			 * 委托多个实现了 BeanDefinitionRegistryPostProcessor 或者 BeanFactoryPostProcessor  接口的类来做BeanDefinition注册后置处理的事情
-			 * -----> 有自定义的也有Spring内部的
-			 *
 			 * BeanDefinitionRegistry的后置处理器执行也有先后顺序：
 			 * 1、执行实现了 	PriorityOrdered 的BeanDefinitionRegistryPostProcessors
 			 * 2、执行实现了 	Ordered         的BeanDefinitionRegistryPostProcessors
 			 * 3、执行		其他所有				BeanDefinitionRegistryPostProcessors
-			 *
 			 * ------------------------------------------------------------------------------------------------
-			 * beanFactory.getBeanNamesForType(xx.class)
-			 * 根据类型获取当前Spring容器内部定义的实现了BeanDefinitionRegistryPostProcessor接口的所有bean的名称
+			 * 从BeanDefinitionNames中获取postprocessor的名称，这些类是在BeanFactory准备阶段已经填充的
 			 */
 			String[] postProcessorNames =
 					beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
-			//当前beanFactory中，实现了PriorityOrdered接口的后置处理器
+			// 当前 beanFactory 中，实现了 PriorityOrdered 接口的后置处理器
+			// ConfigurationClassPostProcessor 实现了 PriorityOrdered 接口
 			for (String ppName : postProcessorNames) {
 				if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
 					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
@@ -116,10 +116,18 @@ final class PostProcessorRegistrationDelegate {
 			//添加到后置处理器集合registryProcessors中，合并list
 			registryProcessors.addAll(currentRegistryProcessors);
 			/**
+			 * 注册spring的beanfactory初始化时拿到的bd，并把import的bd、普通bd扫描出来
 			 * 执行当前Spring容器内部的bean定义注册后置处理器BeanDefinitionRegistryPostProcessor的postProcessBeanDefinitionRegistry
 			 * 注意：这里只是执行 postProcessBeanDefinitionRegistry 方法，并没有执行BeanFactoryPostProcessor的方法
+			 * 普通bean，扫描出来以后直接注册
+			 * import的内容，又分三种情况：先把类信息放到map中，后面注册
+			 * 1、ImportSelector
+			 * 2、ImportBeanDefinitionRegistar
+			 * 3、普通类
 			 */
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
+			//到这里，Spring就执行完所有的BeanDefinitionPostProcessor，包括Spring内部定义的和程序员自定义的
+			//使用完成后，清除，让jvm在合适的时候进行垃圾回收
 			currentRegistryProcessors.clear();
 
 			// Next, invoke the BeanDefinitionRegistryPostProcessors that implement Ordered.
@@ -137,7 +145,7 @@ final class PostProcessorRegistrationDelegate {
 			currentRegistryProcessors.clear();
 
 			// Finally, invoke all other BeanDefinitionRegistryPostProcessors until no further ones appear.
-			//3、执行其他所有BeanDefinitionRegistryPostProcessors
+			//3、执行其他所有BeanDefinitionRegistryPostProcessors，可能在上面的执行过程中又添加了一些新的，就在这里执行
 			boolean reiterate = true;
 			while (reiterate) {
 				reiterate = false;
@@ -156,10 +164,6 @@ final class PostProcessorRegistrationDelegate {
 			}
 
 			// Now, invoke the BeanFactoryPostProcessor callback of all processors handled so far.
-			/**
-			 * 以上执行的是 BeanDefinitionRegistryPostProcessor 的 postProcessBeanDefinitionRegistry
-			 * 现在执行的是 父类BeanFactoryPostProcessor 中的 postProcessBeanFactory
-			 */
 			//执行 实现 BeanDefinitionRegistryPostProcessor 的 BeanFactoryPostPeocessor的方法
 			invokeBeanFactoryPostProcessors(registryProcessors, beanFactory);
 			//执行自定义的 BeanFactoryPostProcessor

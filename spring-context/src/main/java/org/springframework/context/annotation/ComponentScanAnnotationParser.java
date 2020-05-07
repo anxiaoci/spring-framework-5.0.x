@@ -72,6 +72,7 @@ class ComponentScanAnnotationParser {
 	 * 在最后使用scanner最终扫描之前，先把默认属性放在scanner的beanDefinitionDefaults属性中，在执行扫描时把默认属性赋值给扫描
 	 */
 	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, final String declaringClass) {
+		//Spring在容器初始化中，使用this.scanner设置了一个scanner，但是在Spring内部并没有使用，而是像此处一样，自己new一个scanner对象
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this.registry,
 				componentScan.getBoolean("useDefaultFilters"), this.environment, this.resourceLoader);
 		//bean的名字生成器
@@ -106,9 +107,10 @@ class ComponentScanAnnotationParser {
 			}
 		}
 
-		//默认懒加载，不是懒加载，设置为true
+		//默认懒加载，可以在@ComponentScan中设置lazyInit属性
 		boolean lazyInit = componentScan.getBoolean("lazyInit");
 		if (lazyInit) {
+			//把@ComponentScan中添加的属性，先添加到scanner中（因为要扫描的BeanDefinition还没有生成，先保存默认属性）
 			scanner.getBeanDefinitionDefaults().setLazyInit(true);
 		}
 
@@ -118,6 +120,7 @@ class ComponentScanAnnotationParser {
 		String[] basePackagesArray = componentScan.getStringArray("basePackages");
 
 		for (String pkg : basePackagesArray) {
+			//这个解析的目的是？
 			String[] tokenized = StringUtils.tokenizeToStringArray(this.environment.resolvePlaceholders(pkg),
 					ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
 			Collections.addAll(basePackages, tokenized);
