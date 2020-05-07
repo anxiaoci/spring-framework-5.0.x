@@ -16,15 +16,8 @@
 
 package org.springframework.context.annotation;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.asm.Type;
 import org.springframework.beans.factory.BeanFactory;
@@ -38,13 +31,7 @@ import org.springframework.cglib.core.ClassGenerator;
 import org.springframework.cglib.core.Constants;
 import org.springframework.cglib.core.DefaultGeneratorStrategy;
 import org.springframework.cglib.core.SpringNamingPolicy;
-import org.springframework.cglib.proxy.Callback;
-import org.springframework.cglib.proxy.CallbackFilter;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.Factory;
-import org.springframework.cglib.proxy.MethodInterceptor;
-import org.springframework.cglib.proxy.MethodProxy;
-import org.springframework.cglib.proxy.NoOp;
+import org.springframework.cglib.proxy.*;
 import org.springframework.cglib.transform.ClassEmitterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -55,6 +42,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
 
 /**
  * Enhances {@link Configuration} classes by generating a CGLIB subclass which
@@ -521,13 +514,13 @@ class ConfigurationClassEnhancer {
 		 *     }
 		 * }
 		 *
-		 * public Object intercept(Object enhancedConfigInstance, Method beanMethod, Object[] beanMethodArgs,
-		 * 								MethodProxy cglibMethodProxy)
-		 * 	为类A创建动态代理执行方法时,会代理类中的每个定义方法，也就是说在执行过程中，执行method1和method2时，
-		 * 	调用方法和执行方法是同一个方法，此时可以判断为是第一次调用
-		 *
-		 * 	但是对于method2中调用method1，在方法中的调用，此时的method1就是原始方法，
-		 * 	此时 beanMethod是原始方法，cglibMethodProxy是代理方法menthod2(调用方法)
+		 * public Object intercept(Object enhancedConfigInstance, //被代理对象
+		 * 								Method beanMethod,        //被代理对象的当前执行方法
+		 * 								Object[] beanMethodArgs,
+		 * 								MethodProxy cglibMethodProxy) //代理方法(调用方法)
+		 * 	----对于当前执行方法method1，调用方法和被代理执行的方法都是method1
+		 * 	----对于当前执行方法method2，在方法内部调用方法method1时，调用方法是method2，执行方法是method1
+		 * 	（在方法内部被调用的method1也会被代理）
 		 * --------------------------------------------------------
 		 */
 		private boolean isCurrentlyInvokedFactoryMethod(Method method) {
