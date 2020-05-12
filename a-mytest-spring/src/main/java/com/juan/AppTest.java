@@ -16,11 +16,9 @@ public class AppTest {
 	public static void main(String[] args) {
 		//初始化Spring容器
 		AnnotationConfigApplicationContext applicationContext
-				= new AnnotationConfigApplicationContext();
-		applicationContext.register( AppConfig.class );
-//		applicationContext.addBeanFactoryPostProcessor(new MyBeanFactoryPostProcessor());
-		applicationContext.refresh();
-		applicationContext.getBean( UserService.class );
+				= new AnnotationConfigApplicationContext(AppConfig.class );
+		UserService bean = applicationContext.getBean( UserService.class );
+		bean.getUser();
 
 
 	}

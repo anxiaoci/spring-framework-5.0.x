@@ -3,6 +3,7 @@ package com.juan.service;/**
  * @date 2020/4/1
  */
 
+import com.juan.dao.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,18 +12,14 @@ import org.springframework.stereotype.Component;
  * @date 2020/4/1
  * @decription:
  */
-//@Component()
+@Component
 public class UserService {
 	@Autowired
-	private TestService testService;
+	private UserDao userDao;
 
-	public UserService(){
-		System.out.println("UserService is created");
-
-	}
-
-	public void init(){
-		System.out.println("userService init----------");
+	public void getUser(){
+		userDao.get();
+		System.out.println("------service getUser ----");
 	}
 
 }
