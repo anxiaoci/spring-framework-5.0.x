@@ -62,12 +62,14 @@ import org.slf4j.spi.LocationAwareLogger;
  */
 public abstract class LogFactory {
 
+	//初始为JUL
 	private static LogApi logApi = LogApi.JUL;
 
 	static {
+		//Spring容器启动使检测加载
 		ClassLoader cl = LogFactory.class.getClassLoader();
 		try {
-			// Try Log4j 2.x API
+			// Try Log4j 2.x API，Log4j使2.x版本才会被检测到
 			cl.loadClass("org.apache.logging.log4j.spi.ExtendedLogger");
 			logApi = LogApi.LOG4J;
 		}

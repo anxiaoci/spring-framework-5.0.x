@@ -682,11 +682,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Tell the subclass to refresh the internal bean factory.
-	 *
-	 * @return the fresh BeanFactory instance
-	 * @see #refreshBeanFactory()
-	 * @see #getBeanFactory()
+     * Tell the subclass to refresh the internal bean factory.
+	 * 	 *
+	 * 	 * @return the fresh BeanFactory instance
+	 * 	 * @see #refreshBeanFactory()
+	 * 	 * @see #getBeanFactory()
 	 */
 	protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
 		refreshBeanFactory();
@@ -959,9 +959,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		if (!beanFactory.hasEmbeddedValueResolver()) {
 			beanFactory.addEmbeddedValueResolver(strVal -> getEnvironment().resolvePlaceholders(strVal));
 		}
-
 		// Initialize LoadTimeWeaverAware beans early to allow for registering their transformers early.
-		//初始化LoadTimeWeaverAware bean来允许注册转换器
+		//初始化LoadTimeWeaverAware bean来允许注册转换器（Aspectj做静态织入的过程）
 		String[] weaverAwareNames = beanFactory.getBeanNamesForType(LoadTimeWeaverAware.class, false, false);
 		for (String weaverAwareName : weaverAwareNames) {
 			getBean(weaverAwareName);
