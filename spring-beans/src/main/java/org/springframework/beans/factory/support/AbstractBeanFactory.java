@@ -244,8 +244,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		 * 		 beanName中移除&这个字符，所以需要将name的首字母&移除。这样才能从缓存中获取到FactoryBean实例
 		 * 		2、别名问题，转换需要
 		 */
-
-
 		final String beanName = transformedBeanName(name);
 		Object bean;
 
