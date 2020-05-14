@@ -446,6 +446,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Prepare method overrides.
 		//准备方法重写
 		try {
+			/**
+			 * 处理look-method和replace-method配置，Springj将这两个配置统称为重写
+			 */
 			mbdToUse.prepareMethodOverrides();
 		} catch (BeanDefinitionValidationException ex) {
 			throw new BeanDefinitionStoreException( mbdToUse.getResourceDescription(),
@@ -453,8 +456,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		try {
-			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
-			//第一次调用后置处理器--可以允许目标bean实例返回代理
+			/**
+			 * Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+			 * Bean初始化前应用后置处理器，允许目标返回代理
+			 */
 			Object bean = resolveBeforeInstantiation( beanName, mbdToUse );
 			if (bean != null) {
 				return bean;
@@ -1082,7 +1087,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Make sure bean class is actually resolved at this point.
 		//解析Bean的Class对象
 		Class<?> beanClass = resolveBeanClass( mbd, beanName );
-
+		//检测一个类的访问权限，spring默认情况下对非public是允许访问的
 		if (beanClass != null && !Modifier.isPublic( beanClass.getModifiers() ) && !mbd.isNonPublicAccessAllowed()) {
 			throw new BeanCreationException( mbd.getResourceDescription(), beanName,
 					"Bean class isn't public, and non-public access not allowed: " + beanClass.getName() );
@@ -1093,7 +1098,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (instanceSupplier != null) {
 			return obtainFromSupplier( instanceSupplier, beanName );
 		}
-		//使用工厂方法实例化
+		//如果工厂方法不为空，则通过工厂方法构建bean对象
 		if (mbd.getFactoryMethodName() != null) {
 			return instantiateUsingFactoryMethod( beanName, mbd, args );
 		}
@@ -1112,9 +1117,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 		if (resolved) {
-			//需要(构造器)自动注入
 			if (autowireNecessary) {
-				//构造器自动注入
+				//调用有参构造方法
 				return autowireConstructor( beanName, mbd, null, null );
 			} else {
 				//默认构造器实例化bean

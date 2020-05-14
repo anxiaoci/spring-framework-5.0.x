@@ -189,9 +189,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	//---------------------------------------------------------------------
 	// Implementation of BeanFactory interface
 	//---------------------------------------------------------------------
-
 	@Override
 	public Object getBean(String name) throws BeansException {
+		//真正实例化方法
 		return doGetBean(name, null, null, false);
 	}
 
@@ -249,6 +249,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 		// Eagerly check singleton cache for manually registered singletons.
 		//从容器(缓存)中获取bean(如果单例池中已经存在会返回这个单例),在该方法中解决循环依赖
+		/**
+		 * 这个方法在初始化时会调用，在getBean的时候也会调用。
+		 * 也就是说Spring在初始化的时候先获取到这个实例，判断h合格对象是否被实例化
+		 */
 		Object sharedInstance = getSingleton(beanName);
 		//如果bean已经在缓存中
 		if (sharedInstance != null && args == null) {

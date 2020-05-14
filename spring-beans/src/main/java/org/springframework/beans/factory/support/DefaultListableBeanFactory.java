@@ -733,10 +733,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		List<String> beanNames = new ArrayList<>( this.beanDefinitionNames );
 
 		// Trigger initialization of all non-lazy singleton beans...
-		//循环所有bean定义名称
+		//触发所有非延迟加载单例beans的初始化，主要步骤为调用getBean
 		for (String beanName : beanNames) {
-			//合并BeanDefinition(与父BeanDefinition合并)
-			// 如果本地mergedBeanDefinitions中已存在(说明目前合并已完成)，就返回；如果本地mergedBeanDefinitions中不存在，就去做一次合并
+			//合并BeanDefinition(与父BeanDefinition合并，如果有的话，很少会有，在spring2.5以前有)
 			RootBeanDefinition bd = getMergedLocalBeanDefinition( beanName );
 			//根据bean定义 判断 非抽象，单例，非懒加载
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
