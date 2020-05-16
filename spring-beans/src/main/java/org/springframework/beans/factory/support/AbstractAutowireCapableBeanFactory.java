@@ -1087,7 +1087,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Make sure bean class is actually resolved at this point.
 		//解析Bean的Class对象
 		Class<?> beanClass = resolveBeanClass( mbd, beanName );
-		//检测一个类的访问权限，spring默认情况下对非public是允许访问的
+
 		if (beanClass != null && !Modifier.isPublic( beanClass.getModifiers() ) && !mbd.isNonPublicAccessAllowed()) {
 			throw new BeanCreationException( mbd.getResourceDescription(), beanName,
 					"Bean class isn't public, and non-public access not allowed: " + beanClass.getName() );
@@ -1098,7 +1098,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (instanceSupplier != null) {
 			return obtainFromSupplier( instanceSupplier, beanName );
 		}
-		//如果工厂方法不为空，则通过工厂方法构建bean对象
+		//使用工厂方法实例化
 		if (mbd.getFactoryMethodName() != null) {
 			return instantiateUsingFactoryMethod( beanName, mbd, args );
 		}

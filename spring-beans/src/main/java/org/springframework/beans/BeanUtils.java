@@ -153,7 +153,7 @@ public abstract class BeanUtils {
 	 * 使用构造器实例化对象
 	 */
 	public static <T> T instantiateClass(Constructor<T> ctor, Object... args) throws BeanInstantiationException {
-		Assert.notNull(ctor, "Constructor must not be null");
+		Assert.notNull(ctor, "Cons		tructor must not be null");
 		try {
 			ReflectionUtils.makeAccessible(ctor);
 			return (KotlinDetector.isKotlinType(ctor.getDeclaringClass()) ?
