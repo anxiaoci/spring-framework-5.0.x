@@ -21,9 +21,5 @@ public class AppConfig {
 		return new Color();
 	}
 
-	@Bean()
-	public UserFactory userFactory(){
-		return new UserFactory();
-	}
 
 }
