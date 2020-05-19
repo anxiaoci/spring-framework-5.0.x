@@ -323,6 +323,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
 		//alreadyParsed 判断是否处理过
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
+		//解析类，生成BeanDefinition
 		do {
 			//对BeanFactory准备过程中放入的BeanDefinition进行解析
 			//当前测试中包含 6个内部 bd 和 1个自定义配置类 AppConfig
@@ -342,6 +343,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 						this.importBeanNameGenerator, parser.getImportRegistry());
 			}
 			//BeanDefinitionReader 加载BeanDefinition到Spring容器中，把对应的BeanDefinition添加到BeanFactory中的map中
+			//上面是对bean做简单解析，相当于只是生成bd的通用属性内容，在这个方法中解析（加载）bd的特殊属性
 			this.reader.loadBeanDefinitions(configClasses);
 			//通过reader加载到Spring容器中就是处理过
 			alreadyParsed.addAll(configClasses);

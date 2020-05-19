@@ -21,7 +21,10 @@ public class Color {
 	public Color() {
 	}
 
-	public Color(String name) {
+	protected Color(String name) {
 		this.name = name;
+		System.out.println(name);
 	}
+
+
 }

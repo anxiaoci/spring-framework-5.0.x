@@ -60,6 +60,8 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	@Override
 	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
 		// Don't override the class with CGLIB if no overrides.
+		//检测bean配置中是否配置了lookup-method或者replace-method
+		//如果配置了，使用cglib构建bean对象
 		if (!bd.hasMethodOverrides()) {
 			Constructor<?> constructorToUse;
 			//同步方法的作用：1、获取bean实例化的构造器 2、把构造器传递给resolvedConstructorOrFactoryMethod

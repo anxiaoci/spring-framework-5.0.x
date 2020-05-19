@@ -4,7 +4,6 @@ package com.juan;/**
  */
 
 import com.juan.config.AppConfig;
-import com.juan.service.UserService;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
@@ -17,8 +16,9 @@ public class AppTest {
 		//初始化Spring容器
 		AnnotationConfigApplicationContext applicationContext
 				= new AnnotationConfigApplicationContext(AppConfig.class );
-		UserService bean = applicationContext.getBean( UserService.class );
-		bean.getUser();
+//		UserService bean = applicationContext.getBean( UserService.class );
+//		bean.getUser();
+		System.out.println( applicationContext.getBean( "factory" ) );
 
 
 	}
