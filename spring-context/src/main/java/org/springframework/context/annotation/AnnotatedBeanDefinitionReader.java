@@ -17,7 +17,6 @@
 package org.springframework.context.annotation;
 
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -225,13 +224,12 @@ public class AnnotatedBeanDefinitionReader {
 	 */
 	<T> void doRegisterBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier, @Nullable String name,
 							@Nullable Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
-		//为配置bean生成BeanDefinitation
+		//为配置bean生成 BeanDefinitation
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
 		//判断是否需要跳过解析
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
 			return;
 		}
-
 
 		abd.setInstanceSupplier(instanceSupplier);
 		//获取bean的作用域
@@ -241,7 +239,7 @@ public class AnnotatedBeanDefinitionReader {
 		abd.setScope(scopeMetadata.getScopeName());
 		//获取beanname，如果没有给bean定义一个名字，则为bean生成一个名字（name生成器）
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
-		//处理类中通用注解 @Lazy @Primary @DependOn等
+		//处理类中通用注解 @Lazy @Primary @DependOn等，为abd添加相关属性
 		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
 		//一般是传进来的
 		if (qualifiers != null) {
@@ -259,12 +257,11 @@ public class AnnotatedBeanDefinitionReader {
 		for (BeanDefinitionCustomizer customizer : definitionCustomizers) {
 			customizer.customize(abd);
 		}
-		//一个数据结构，属性内容包括beanname、beandefinition
+		//BeanDefinitionHolder 属性内容包括beanname、beandefinition
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
-		//处理Scope代理模型，需要结合springmvc理解？？？为什么要这么麻烦生成一个definitionHolder，后面还是只是获取了beandefinition注册？？？
+		//处理Scope代理模型，与springmvc相关
 		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
-		//把definitionHolder注册给registry
-		//registry就是AnnotationConfigApplicationContext
+		//把definitionHolder注册给registry（AnnotationConfigApplicationContext）
 		//AnnotationConfigApplicationContexta在初始化的时候通过调用父类的构造方法实例化一个DefaultListableBeanFactory
 		//registerBeanDefinition里面就是把definitionHolder这个数据结构包含的信息注册到DefaultListableBeanFactory中
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);

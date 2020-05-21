@@ -84,7 +84,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		 * 调用父类构造器，把BeanFactory赋值为DefaultListableBeanFactory
 		 * 初始化注解模式下的bean定义扫描器
 		 * 作用：BeanDefinition读取器
-		 * ---->在初始化过程中，注册了6个BeanDefinition
+		 * ---->在初始化过程中，注册了6个BeanDefinition(包含ConfigurationClassPostProcessor)
 		 */
 		this.reader = new AnnotatedBeanDefinitionReader( this );
 		/**

@@ -790,24 +790,21 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of BeanDefinitionRegistry interface
 	// 把BeanDefinition   put入   beanDefinitionMap
 	//---------------------------------------------------------------------
-
 	@Override
 	public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
 			throws BeanDefinitionStoreException {
-
 		Assert.hasText( beanName, "Bean name must not be empty" );
 		Assert.notNull( beanDefinition, "BeanDefinition must not be null" );
 		//验证bean定义是不是AbstractBeanDefinition
 		if (beanDefinition instanceof AbstractBeanDefinition) {
 			try {
-				//验证方法
+				//bd验证
 				((AbstractBeanDefinition) beanDefinition).validate();
 			} catch (BeanDefinitionValidationException ex) {
 				throw new BeanDefinitionStoreException( beanDefinition.getResourceDescription(), beanName,
 						"Validation of bean definition failed", ex );
 			}
 		}
-		//
 		BeanDefinition existingDefinition = this.beanDefinitionMap.get( beanName );
 		//bean已经在beanDefinitionMap，做进一步判断是否需要把bean再次放到beanDefinitionMap中
 		if (existingDefinition != null) {
@@ -836,9 +833,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 			this.beanDefinitionMap.put( beanName, beanDefinition );
-		} else { //如果当前注册的bean不在beanDefinitionMap
-			//bean创建已经开始
-			if (hasBeanCreationStarted()) {
+		} else {
+			if (hasBeanCreationStarted()) { //???
 				// Cannot modify startup-time collection elements anymore (for stable iteration)
 				synchronized (this.beanDefinitionMap) { //同步方式把bean定义放入beanDefinitionMap
 					this.beanDefinitionMap.put( beanName, beanDefinition );
@@ -852,17 +848,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						this.manualSingletonNames = updatedSingletons;
 					}
 				}
-			} else { //bean没有开始创建
+			} else {
 				// Still in startup registration phase
-				//bean定义map
 				this.beanDefinitionMap.put( beanName, beanDefinition );
 				//bean定义名称的list集合
 				this.beanDefinitionNames.add( beanName );
-				//
 				this.manualSingletonNames.remove( beanName );
 			}
 			this.frozenBeanDefinitionNames = null;
 		}
+
 
 		if (existingDefinition != null || containsSingleton( beanName )) {
 			resetBeanDefinition( beanName );
